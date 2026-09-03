@@ -118,6 +118,11 @@
         .partial-input button{padding:10px 20px;border:none;border-radius:10px;background:var(--success);color:#fff;font-weight:700;cursor:pointer}
         .footer-credit{text-align:center;padding:20px 0 10px;font-size:11px;color:#5b6b81;border-top:1px solid var(--border);margin-top:20px}
         .footer-credit strong{color:var(--gold)}
+        .user-mgmt-card{background:#f8f9fa;border:2px solid var(--gold);border-radius:14px;padding:16px;margin-bottom:12px}
+        .user-mgmt-card h3{color:var(--gold);margin-bottom:12px}
+        .user-list-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+        .user-list-item:last-child{border-bottom:none}
+        .user-list-item .role-tag{font-size:11px;padding:2px 10px;border-radius:20px;background:var(--gold-light);color:var(--gold)}
         @media (max-width:600px){.row2{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.role-selector button{font-size:11px;padding:6px 8px}.driver-actions .btn-row button{min-width:70px;font-size:11px;padding:8px}.brand h1{font-size:14px}.brand-icon{width:44px;height:44px}.brand-icon .logo-text{font-size:12px}.brand-icon .logo-text .as{font-size:7px}.header{padding:12px 14px}}
     </style>
 </head>
@@ -142,6 +147,13 @@
             <input type="email" id="regEmail" placeholder="example@email.com">
             <label>كلمة المرور</label>
             <input type="password" id="regPassword" placeholder="********">
+            <label>الدور (اختياري)</label>
+            <select id="regRole">
+                <option value="manager">🚚 مدير النقل</option>
+                <option value="sales">📋 مندوب مبيعات</option>
+                <option value="warehouse">🏚️ مخازن</option>
+                <option value="viewer">👀 مشاهد</option>
+            </select>
             <button class="btn-primary btn-gold" id="registerBtn">إنشاء حساب</button>
             <div class="sub">لديك حساب؟ <a href="#" id="showLoginBtn">سجل دخول</a></div>
         </div>
@@ -170,11 +182,13 @@
                 <button class="tab" data-tab="new">➕ طلب جديد</button>
                 <button class="tab" data-tab="orders">📋 الطلبات</button>
                 <button class="tab" data-tab="reports">📈 التقارير</button>
+                <button class="tab" data-tab="users" id="usersTab">👥 المستخدمين</button>
             </div>
             <div id="viewDashboard" class="view"></div>
             <div id="viewNew" class="view hidden"></div>
             <div id="viewOrders" class="view hidden"></div>
             <div id="viewReports" class="view hidden"></div>
+            <div id="viewUsers" class="view hidden"></div>
             <div id="viewDetail" class="view hidden"></div>
             <div class="footer-credit">© 2026 <strong>RASRAS Material Raw</strong> - رصرص للتوكيلات التجارية</div>
         </div>
@@ -184,6 +198,8 @@
         const PROJECT_ID = '6a98cf310022ce38f1c4';
         const DATABASE_ID = 'orders_db';
         const COLLECTION_ID = 'orders_collection';
+        const USERS_COLLECTION = 'users_collection';
+
         const client = new Client().setEndpoint('https://fra.cloud.appwrite.io/v1').setProject(PROJECT_ID);
         const account = new Account(client);
         const databases = new Databases(client);
@@ -192,6 +208,7 @@
         const state = {
             user: null,
             orders: [],
+            users: [],
             currentTab: 'dashboard',
             selectedOrderId: null,
             userRole: 'manager',
@@ -278,6 +295,37 @@
             showToast('✅ تم فتح واتساب مع السائق');
         }
 
+        // ========== LOAD USERS ==========
+        async function loadUsers() {
+            try {
+                const response = await databases.listDocuments(DATABASE_ID, USERS_COLLECTION);
+                state.users = response.documents.map(d => ({ ...d, $id: d.$id }));
+            } catch (e) {
+                console.warn('⚠️ فشل تحميل المستخدمين:', e);
+                state.users = [];
+            }
+            renderUsers();
+        }
+
+        // ========== CREATE USER ==========
+        async function createUserInDB(email, role) {
+            try {
+                const doc = await databases.createDocument(DATABASE_ID, USERS_COLLECTION, ID.unique(), {
+                    email: email,
+                    role: role,
+                    createdAt: new Date().toISOString()
+                });
+                state.users.push(doc);
+                renderUsers();
+                showToast('✅ تم إضافة المستخدم بنجاح');
+                return doc;
+            } catch (e) {
+                showToast('❌ خطأ: ' + e.message);
+                return null;
+            }
+        }
+
+        // ========== LOAD ORDERS ==========
         async function loadOrders() {
             try {
                 const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
@@ -318,6 +366,7 @@
             }
         }
 
+        // ========== DRIVER ACTIONS ==========
         async function driverDeliverFull(orderId) {
             const order = state.orders.find(o => o.$id === orderId);
             if (!order) return;
@@ -367,6 +416,7 @@
             showToast('❌ تم تسجيل فشل التسليم');
         }
 
+        // ========== AUTH ==========
         async function checkUser() {
             try {
                 const user = await account.get();
@@ -378,6 +428,14 @@
                 const orderId = urlParams.get('order');
                 if (orderId) { state.selectedOrderId = orderId; state.currentTab = 'detail'; }
                 await loadOrders();
+                await loadUsers();
+                // إظهار تبويب المستخدمين للمدير فقط
+                const usersTab = document.getElementById('usersTab');
+                if (state.userRole === 'manager') {
+                    usersTab.style.display = 'block';
+                } else {
+                    usersTab.style.display = 'none';
+                }
             } catch (e) {
                 state.user = null;
                 document.getElementById('loginContainer').classList.remove('hidden');
@@ -400,11 +458,16 @@
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+            if (!email || !pass) { showToast('❌ أدخل البريد وكلمة المرور'); return; }
             try {
                 await account.create(ID.unique(), email, pass);
+                await createUserInDB(email, role);
                 showToast('✅ تم إنشاء الحساب، سجل دخول الآن');
                 document.getElementById('registerForm').classList.add('hidden');
                 document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPassword').value = '';
             } catch (e) {
                 showToast('❌ ' + e.message);
             }
@@ -444,12 +507,14 @@
             });
         });
 
+        // ========== RENDER FUNCTIONS ==========
         function renderAll() {
             renderDashboard();
             renderOrders();
             renderReports();
             renderNewOrder();
             renderDetail();
+            renderUsers();
             updateTabs();
         }
 
@@ -458,7 +523,7 @@
                 el.classList.toggle('active', el.dataset.tab === state.currentTab);
             });
             document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-            const viewMap = { 'dashboard': 'viewDashboard', 'new': 'viewNew', 'orders': 'viewOrders', 'reports': 'viewReports', 'detail': 'viewDetail' };
+            const viewMap = { 'dashboard': 'viewDashboard', 'new': 'viewNew', 'orders': 'viewOrders', 'reports': 'viewReports', 'users': 'viewUsers', 'detail': 'viewDetail' };
             const target = document.getElementById(viewMap[state.currentTab]);
             if (target) target.classList.remove('hidden');
         }
@@ -554,6 +619,59 @@
               <div class="stat"><span class="icon">❌</span><b>${failed}</b><span>فشل التسليم</span></div>
             </div>
           `;
+        }
+
+        function renderUsers() {
+            const el = document.getElementById('viewUsers');
+            if (state.userRole !== 'manager') {
+                el.innerHTML = '<div class="empty">⛔ هذه الصفحة مخصصة للمدير فقط</div>';
+                return;
+            }
+            const list = state.users;
+            el.innerHTML = `
+            <div class="user-mgmt-card">
+              <h3>👥 إدارة المستخدمين</h3>
+              <div class="row2">
+                <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني">
+                <input type="password" id="newUserPassword" placeholder="كلمة المرور">
+              </div>
+              <div class="row2" style="margin-top:8px;">
+                <select id="newUserRole">
+                  <option value="manager">🚚 مدير النقل</option>
+                  <option value="sales">📋 مندوب مبيعات</option>
+                  <option value="warehouse">🏚️ مخازن</option>
+                  <option value="viewer">👀 مشاهد</option>
+                </select>
+                <button class="btn-primary btn-gold" id="addUserBtn" style="margin:0;">➕ إضافة مستخدم</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3 style="font-size:14px;">📋 قائمة المستخدمين (${list.length})</h3>
+              ${list.length === 0 ? '<div class="empty">لا يوجد مستخدمون</div>' :
+                list.map(u => `
+                  <div class="user-list-item">
+                    <span>${escapeHtml(u.email)}</span>
+                    <span class="role-tag">${u.role || 'مشاهد'}</span>
+                  </div>
+                `).join('')
+              }
+            </div>
+          `;
+            document.getElementById('addUserBtn')?.addEventListener('click', async () => {
+                const email = document.getElementById('newUserEmail').value;
+                const pass = document.getElementById('newUserPassword').value;
+                const role = document.getElementById('newUserRole').value;
+                if (!email || !pass) { showToast('❌ أدخل البريد وكلمة المرور'); return; }
+                try {
+                    await account.create(ID.unique(), email, pass);
+                    await createUserInDB(email, role);
+                    document.getElementById('newUserEmail').value = '';
+                    document.getElementById('newUserPassword').value = '';
+                    showToast('✅ تم إضافة المستخدم بنجاح');
+                } catch (e) {
+                    showToast('❌ ' + e.message);
+                }
+            });
         }
 
         function renderNewOrder() {
@@ -897,7 +1015,14 @@
             }
         });
 
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                state.currentTab = tab.dataset.tab;
+                renderAll();
+            });
+        });
+
         checkUser();
     </script>
 </body>
-</html>
+    </html>
