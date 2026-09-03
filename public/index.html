@@ -1,1183 +1,812 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rasras System - نظام رصرص للتوكيلات التجارية</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --primary: #1a2a3a;
-    --primary-light: #2c3e50;
-    --gold: #c9a84c;
-    --gold-light: #f5e6b8;
-    --gold-dark: #a8892e;
-    --success: #27ae60;
-    --danger: #e74c3c;
-    --warning: #f39c12;
-    --info: #3498db;
-    --gray: #95a5a6;
-    --light-gray: #ecf0f1;
-    --white: #ffffff;
-    --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    --radius: 16px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: #f8f9fa;
-    color: #2c3e50;
-    min-height: 100vh;
-    direction: rtl;
-  }
-
-  /* Login Screen */
-  .login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
-    padding: 20px;
-  }
-
-  .login-box {
-    background: white;
-    border-radius: 24px;
-    padding: 48px 40px;
-    max-width: 420px;
-    width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    animation: slideUp 0.6s ease;
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .login-logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  .login-logo img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: var(--gold);
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-
-  .login-logo h1 {
-    font-size: 22px;
-    font-weight: 900;
-    color: var(--primary);
-    letter-spacing: -0.5px;
-  }
-
-  .login-logo p {
-    color: var(--gray);
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 6px;
-    color: var(--primary);
-  }
-
-  .form-group input,
-  .form-group select {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e8ecf0;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 14px;
-    transition: var(--transition);
-    background: #fafbfc;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: var(--gold);
-    background: white;
-    box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1);
-  }
-
-  .btn-login {
-    width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-    margin-top: 8px;
-  }
-
-  .btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(201, 168, 76, 0.3);
-  }
-
-  /* Main App */
-  .app {
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 16px;
-    padding-bottom: 80px;
-  }
-
-  /* Header */
-  .header {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .header-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 18px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .header-info h2 {
-    font-size: 16px;
-    font-weight: 800;
-    margin: 0;
-    color: var(--primary);
-  }
-
-  .header-info span {
-    font-size: 11px;
-    color: var(--gray);
-    font-weight: 500;
-  }
-
-  .header-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px 6px 10px;
-    background: var(--light-gray);
-    border-radius: 30px;
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--gold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-  }
-
-  .btn-logout {
-    padding: 8px 16px;
-    background: none;
-    border: 2px solid #e8ecf0;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gray);
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .btn-logout:hover {
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-
-  /* Stats */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .stat-card {
-    background: var(--white);
-    padding: 16px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    text-align: center;
-    transition: var(--transition);
-  }
-
-  .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-  }
-
-  .stat-number {
-    font-size: 24px;
-    font-weight: 900;
-    color: var(--primary);
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--gray);
-    font-weight: 600;
-    margin-top: 4px;
-  }
-
-  .stat-card.gold .stat-number { color: var(--gold-dark); }
-  .stat-card.green .stat-number { color: var(--success); }
-  .stat-card.red .stat-number { color: var(--danger); }
-  .stat-card.blue .stat-number { color: var(--info); }
-
-  /* Tabs */
-  .tabs {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid #e8ecf0;
-    flex-wrap: nowrap;
-  }
-
-  .tab {
-    flex: 0 0 auto;
-    padding: 10px 20px;
-    border: none;
-    background: none;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--gray);
-    cursor: pointer;
-    border-radius: 12px;
-    transition: var(--transition);
-    white-space: nowrap;
-    position: relative;
-  }
-
-  .tab:hover {
-    background: var(--light-gray);
-  }
-
-  .tab.active {
-    color: var(--primary);
-    background: var(--gold-light);
-  }
-
-  .tab .badge {
-    background: var(--danger);
-    color: white;
-    font-size: 10px;
-    padding: 1px 8px;
-    border-radius: 20px;
-    margin-right: 6px;
-    font-weight: 700;
-  }
-
-  /* Cards */
-  .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-  }
-
-  .card:hover {
-    box-shadow: 0 6px 30px rgba(0,0,0,0.1);
-  }
-
-  /* Order Items */
-  .order-item {
-    background: var(--white);
-    border: 2px solid #e8ecf0;
-    border-radius: var(--radius);
-    padding: 16px 18px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .order-item:hover {
-    border-color: var(--gold);
-    transform: translateX(-4px);
-  }
-
-  .order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .order-id {
-    font-size: 12px;
-    color: var(--gray);
-    font-weight: 600;
-  }
-
-  .order-name {
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 2px;
-  }
-
-  .order-meta {
-    font-size: 12px;
-    color: var(--gray);
-    margin-top: 4px;
-  }
-
-  .order-status {
-    padding: 4px 14px;
-    border-radius: 30px;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .status-sales_created { background: #e8ecf0; color: #5a6a7a; }
-  .status-logistics_review { background: #fef9e7; color: #b7950b; }
-  .status-accounts_approval { background: #fef9e7; color: #b7950b; }
-  .status-warehouse_release { background: #eafaf1; color: #1a7a5a; }
-  .status-with_driver { background: #eafaf1; color: #1a7a5a; }
-  .status-delivered { background: #1a2a3a; color: white; }
-
-  /* WhatsApp Buttons */
-  .btn-whatsapp {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: #25D366;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .btn-whatsapp:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-  }
-
-  .btn-whatsapp svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* Driver Action Buttons */
-  .driver-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-  }
-
-  .btn-driver {
-    flex: 1;
-    min-width: 120px;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .btn-delivered {
-    background: var(--success);
-    color: white;
-  }
-
-  .btn-delivered:hover {
-    background: #219a52;
-    transform: scale(1.02);
-  }
-
-  .btn-not-delivered {
-    background: var(--danger);
-    color: white;
-  }
-
-  .btn-not-delivered:hover {
-    background: #c0392b;
-    transform: scale(1.02);
-  }
-
-  .btn-problem {
-    background: var(--warning);
-    color: white;
-  }
-
-  .btn-problem:hover {
-    background: #d68910;
-    transform: scale(1.02);
-  }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--primary);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.4s ease;
-    pointer-events: none;
-    max-width: 90%;
-    text-align: center;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-8px);
-  }
-
-  /* Empty State */
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--gray);
-  }
-
-  .empty svg {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 16px;
-    opacity: 0.3;
-  }
-
-  .empty p {
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    .login-box { padding: 32px 24px; }
-    .header { flex-direction: column; align-items: stretch; }
-    .header-user { justify-content: space-between; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .tabs { gap: 4px; }
-    .tab { padding: 8px 14px; font-size: 12px; }
-    .driver-actions { flex-direction: column; }
-    .btn-driver { min-width: unset; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رصرص للتوكيلات التجارية - نظام الإدارة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f0f2f5;
+            direction: rtl;
+        }
+        
+        :root {
+            --primary: #1a2a3a;
+            --gold: #c9a84c;
+            --gold-dark: #a8892e;
+            --gold-light: #f5e6b8;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Login */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), #2c3e50);
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        
+        .login-card .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-card .logo h1 {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 900;
+        }
+        
+        .login-card .logo p {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+        
+        .login-card .logo .brand {
+            width: 72px;
+            height: 72px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8ecf0;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: var(--radius);
+            color: white;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 168, 76, 0.3);
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-brand .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 20px;
+        }
+        
+        .header-brand h2 {
+            font-size: 16px;
+            font-weight: 800;
+        }
+        
+        .header-brand span {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: #f8f9fa;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .user-info .avatar {
+            width: 30px;
+            height: 30px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        
+        .btn-logout {
+            padding: 8px 16px;
+            border: 2px solid #e8ecf0;
+            border-radius: 10px;
+            background: none;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        
+        .stat-card .label {
+            font-size: 13px;
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .stat-card.gold .number { color: var(--gold-dark); }
+        .stat-card.green .number { color: var(--success); }
+        .stat-card.red .number { color: var(--danger); }
+        .stat-card.blue .number { color: #3498db; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 4px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: white;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: #7f8c8d;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tab .badge {
+            background: var(--danger);
+            color: white;
+            padding: 1px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-right: 6px;
+        }
+        
+        /* Order Cards */
+        .order-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            border-right: 4px solid var(--gold);
+            transition: all 0.3s;
+        }
+        
+        .order-card:hover {
+            transform: translateX(-4px);
+        }
+        
+        .order-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 0;
+            box-shadow: none;
+            background: none;
+        }
+        
+        .order-card .order-id {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+        
+        .order-card .order-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .order-card .order-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        
+        .status-sales_created { background: #e8ecf0; color: #5a6a7a; }
+        .status-logistics_review { background: #fef9e7; color: #b7950b; }
+        .status-accounts_approval { background: #fef9e7; color: #b7950b; }
+        .status-warehouse_release { background: #eafaf1; color: #1a7a5a; }
+        .status-with_driver { background: #d5f5e3; color: #1a7a5a; }
+        .status-delivered { background: var(--primary); color: white; }
+        
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-whatsapp:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .btn-driver {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-driver-delivered {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-driver-not-delivered {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-driver-problem {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-driver:hover {
+            transform: scale(1.02);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal .modal-header h3 {
+            font-size: 18px;
+        }
+        
+        .modal .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .modal .form-group input,
+        .modal .form-group select,
+        .modal .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8ecf0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .modal .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .header { flex-direction: column; align-items: stretch; }
+            .header-user { justify-content: space-between; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .login-card { padding: 32px 24px; }
+            .order-card .header { flex-direction: column; }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .stat-card { padding: 14px; }
+            .stat-card .number { font-size: 22px; }
+            .tabs { gap: 4px; }
+            .tab { padding: 8px 14px; font-size: 12px; }
+            .order-actions { flex-direction: column; }
+            .btn-whatsapp, .btn-driver { width: 100%; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-
-<div id="app"></div>
-<div class="toast" id="toast"></div>
-
-<script>
-// ===== DATA =====
-let DATA = { users: [], orders: [], customers: [], suppliers: [] };
-let CURRENT_USER = null;
-let LOADED = false;
-
-// ===== INIT DATA =====
-function initData() {
-  if (DATA.users.length === 0) {
-    DATA.users = [
-      { id: 'u1', username: 'admin', password: 'admin123', role: 'admin', name: 'مدير النظام', phone: '01000000000' },
-      { id: 'u2', username: 'sales', password: 'sales123', role: 'sales', name: 'أحمد محمد', phone: '01011111111' },
-      { id: 'u3', username: 'logistics', password: 'log123', role: 'logistics', name: 'خالد علي', phone: '01022222222' },
-      { id: 'u4', username: 'accounts', password: 'acc123', role: 'accounts', name: 'سارة أحمد', phone: '01033333333' },
-      { id: 'u5', username: 'warehouse', password: 'ware123', role: 'warehouse', name: 'محمد إبراهيم', phone: '01044444444' },
-      { id: 'u6', username: 'driver1', password: 'driver123', role: 'driver', name: 'سائق 1', phone: '01055555555' },
-      { id: 'u7', username: 'driver2', password: 'driver123', role: 'driver', name: 'سائق 2', phone: '01066666666' },
-    ];
-  }
-  if (DATA.orders.length === 0) {
-    DATA.orders = [
-      {
-        id: 'SO-1001',
-        type: 'sale',
-        partyName: 'محمد علي',
-        phone: '01012345678',
-        address: 'شارع النيل، القاهرة',
-        taxInvoice: true,
-        paymentMethod: 'نقدي',
-        items: [{ name: 'جهاز لابتوب', qty: 2, price: 15000 }],
-        shippingCost: 200,
-        finalTotal: 30200,
-        stage: 'with_driver',
-        driverName: 'سائق 1',
-        driverPhone: '01055555555',
-        createdBy: 'أحمد محمد',
-        createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-        history: [
-          { stage: 'sales_created', by: 'أحمد محمد', note: 'تم إنشاء الأمر', at: new Date(Date.now() - 3600000 * 2).toISOString() },
-          { stage: 'logistics_review', by: 'النظام', note: 'تم تحويل للنقل', at: new Date(Date.now() - 3600000 * 1.5).toISOString() },
-          { stage: 'logistics_review', by: 'خالد علي', note: 'تم تحديد تكلفة النقل 200 ج.م', at: new Date(Date.now() - 3600000 * 1).toISOString() },
-          { stage: 'accounts_approval', by: 'النظام', note: 'تم تحويل للحسابات', at: new Date(Date.now() - 3600000 * 0.8).toISOString() },
-          { stage: 'accounts_approval', by: 'سارة أحمد', note: 'تم اعتماد السعر النهائي 30,200 ج.م', at: new Date(Date.now() - 3600000 * 0.5).toISOString() },
-          { stage: 'warehouse_release', by: 'النظام', note: 'تم تحويل للمخازن', at: new Date(Date.now() - 3600000 * 0.3).toISOString() },
-          { stage: 'warehouse_release', by: 'محمد إبراهيم', note: 'تم إصدار إذن الصرف للسائق: سائق 1', at: new Date(Date.now() - 3600000 * 0.1).toISOString() },
-          { stage: 'with_driver', by: 'النظام', note: 'الأمر مع السائق', at: new Date(Date.now() - 3600000 * 0.05).toISOString() },
-        ],
-        driverStatus: 'pending' // pending, delivered, not_delivered, problem
-      },
-      {
-        id: 'SO-1002',
-        type: 'sale',
-        partyName: 'فاطمة حسن',
-        phone: '01098765432',
-        address: 'مدينة نصر، القاهرة',
-        taxInvoice: false,
-        paymentMethod: 'بطاقة ائتمان',
-        items: [{ name: 'هاتف محمول', qty: 3, price: 8000 }],
-        shippingCost: 150,
-        finalTotal: 24150,
-        stage: 'warehouse_release',
-        driverName: null,
-        driverPhone: null,
-        createdBy: 'أحمد محمد',
-        createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-        history: [
-          { stage: 'sales_created', by: 'أحمد محمد', note: 'تم إنشاء الأمر', at: new Date(Date.now() - 3600000 * 5).toISOString() },
-          { stage: 'logistics_review', by: 'النظام', note: 'تم تحويل للنقل', at: new Date(Date.now() - 3600000 * 4.5).toISOString() },
-          { stage: 'logistics_review', by: 'خالد علي', note: 'تم تحديد تكلفة النقل 150 ج.م', at: new Date(Date.now() - 3600000 * 4).toISOString() },
-          { stage: 'accounts_approval', by: 'النظام', note: 'تم تحويل للحسابات', at: new Date(Date.now() - 3600000 * 3.5).toISOString() },
-          { stage: 'accounts_approval', by: 'سارة أحمد', note: 'تم اعتماد السعر النهائي 24,150 ج.م', at: new Date(Date.now() - 3600000 * 3).toISOString() },
-          { stage: 'warehouse_release', by: 'النظام', note: 'تم تحويل للمخازن', at: new Date(Date.now() - 3600000 * 2.5).toISOString() },
-        ],
-        driverStatus: null
-      },
-      {
-        id: 'PO-1003',
-        type: 'purchase',
-        partyName: 'شركة الإلكترونيات',
-        phone: '0212345678',
-        address: 'العاشر من رمضان',
-        taxInvoice: true,
-        paymentMethod: 'شيك',
-        items: [{ name: 'شاشات LED', qty: 5, price: 4500 }],
-        shippingCost: 300,
-        finalTotal: 22800,
-        stage: 'delivered',
-        driverName: 'سائق 2',
-        driverPhone: '01066666666',
-        createdBy: 'أحمد محمد',
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-        history: [
-          { stage: 'sales_created', by: 'أحمد محمد', note: 'تم إنشاء أمر الشراء', at: new Date(Date.now() - 86400000 * 3).toISOString() },
-          { stage: 'logistics_review', by: 'النظام', note: 'تم تحويل للنقل', at: new Date(Date.now() - 86400000 * 2.8).toISOString() },
-          { stage: 'logistics_review', by: 'خالد علي', note: 'تم تحديد تكلفة النقل 300 ج.م', at: new Date(Date.now() - 86400000 * 2.5).toISOString() },
-          { stage: 'accounts_approval', by: 'النظام', note: 'تم تحويل للحسابات', at: new Date(Date.now() - 86400000 * 2.2).toISOString() },
-          { stage: 'accounts_approval', by: 'سارة أحمد', note: 'تم اعتماد السعر النهائي 22,800 ج.م', at: new Date(Date.now() - 86400000 * 2).toISOString() },
-          { stage: 'warehouse_release', by: 'النظام', note: 'تم تحويل للمخازن', at: new Date(Date.now() - 86400000 * 1.8).toISOString() },
-          { stage: 'warehouse_release', by: 'محمد إبراهيم', note: 'تم إصدار إذن الصرف للسائق: سائق 2', at: new Date(Date.now() - 86400000 * 1.5).toISOString() },
-          { stage: 'with_driver', by: 'النظام', note: 'الأمر مع السائق', at: new Date(Date.now() - 86400000 * 1.2).toISOString() },
-          { stage: 'delivered', by: 'سائق 2', note: 'تم تسليم الأمر بنجاح', at: new Date(Date.now() - 86400000 * 0.5).toISOString() },
-        ],
-        driverStatus: 'delivered'
-      }
-    ];
-    DATA.customers = [
-      { name: 'محمد علي', phone: '01012345678', address: 'شارع النيل، القاهرة', orderIds: ['SO-1001'] },
-      { name: 'فاطمة حسن', phone: '01098765432', address: 'مدينة نصر، القاهرة', orderIds: ['SO-1002'] },
-    ];
-    DATA.suppliers = [
-      { name: 'شركة الإلكترونيات', phone: '0212345678', address: 'العاشر من رمضان', orderIds: ['PO-1003'] },
-    ];
-  }
-}
-
-// ===== HELPERS =====
-function uid(prefix) { return prefix + '-' + Math.floor(10000 + Math.random() * 89999); }
-function todayISO() { return new Date().toISOString(); }
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-function fmtMoney(n) { return Number(n || 0).toLocaleString('ar-EG') + ' ج.م'; }
-function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ===== STAGES =====
-const STAGES = [
-  { key: 'sales_created', label: 'إنشاء الأمر', short: 'إنشاء' },
-  { key: 'logistics_review', label: 'مراجعة النقل', short: 'النقل' },
-  { key: 'accounts_approval', label: 'اعتماد الحسابات', short: 'الحسابات' },
-  { key: 'warehouse_release', label: 'إذن صرف المخازن', short: 'المخازن' },
-  { key: 'with_driver', label: 'مع السائق', short: 'السائق' },
-  { key: 'delivered', label: 'تم التسليم', short: 'تم' },
-];
-
-function stageIndex(stage) { return STAGES.findIndex(s => s.key === stage); }
-function getStageLabel(stage) { const s = STAGES.find(s => s.key === stage); return s ? s.label : stage; }
-
-// ===== SAVE / LOAD =====
-async function loadData() {
-  try {
-    const res = await fetch('/api/data');
-    const data = await res.json();
-    if (data && data.users) DATA = data;
-    else initData();
-  } catch (e) {
-    initData();
-  }
-  LOADED = true;
-}
-
-async function saveData() {
-  try {
-    await fetch('/api/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(DATA)
-    });
-  } catch (e) {
-    showToast('تعذر الحفظ، تأكد من الاتصال بالإنترنت');
-  }
-}
-
-// ===== WHATSAPP =====
-function buildWhatsAppMessage(order) {
-  const total = order.finalTotal || (order.items.reduce((s, i) => s + i.qty * i.price, 0) + (order.shippingCost || 0));
-  const itemsText = order.items.map(i => `• ${i.name} × ${i.qty} = ${fmtMoney(i.qty * i.price)}`).join('\n');
-  const typeLabel = order.type === 'sale' ? 'أمر بيع' : 'أمر شراء';
-  return `🚚 *رصرص للتوكيلات التجارية*\n` +
-    `*${typeLabel} #${order.id}*\n\n` +
-    `👤 العميل: ${order.partyName}\n` +
-    `📞 التليفون: ${order.phone}\n` +
-    `📍 العنوان: ${order.address || 'غير محدد'}\n\n` +
-    `📦 *الأصناف:*\n${itemsText}\n\n` +
-    `💰 الإجمالي: ${fmtMoney(total)}\n` +
-    `💳 طريقة الدفع: ${order.paymentMethod}\n` +
-    `🧾 فاتورة ضريبية: ${order.taxInvoice ? 'نعم' : 'لا'}\n\n` +
-    `*📋 يرجى اختيار حالة الشحنة:*\n` +
-    `1️⃣ تم التسليم\n` +
-    `2️⃣ لم يتم التسليم\n` +
-    `3️⃣ يوجد مشكلة\n\n` +
-    `✍️ الرجاء الرد برقم الخيار المناسب.\n` +
-    `شكرًا لتعاونك مع *رصرص للتوكيلات التجارية* 🌟`;
-}
-
-function sendWhatsAppToDriver(order) {
-  if (!order.driverPhone) {
-    showToast('لا يوجد رقم تليفون مسجل للسائق');
-    return;
-  }
-  let phone = order.driverPhone.replace(/[^0-9]/g, '');
-  if (phone.startsWith('0')) phone = '2' + phone;
-  if (!phone.startsWith('2')) phone = '2' + phone;
-  const msg = buildWhatsAppMessage(order);
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// ===== DRIVER STATUS UPDATE =====
-function updateDriverStatus(orderId, status, note) {
-  const order = DATA.orders.find(o => o.id === orderId);
-  if (!order) { showToast('الأمر غير موجود'); return; }
-
-  const statusLabels = {
-    delivered: 'تم التسليم',
-    not_delivered: 'لم يتم التسليم',
-    problem: 'يوجد مشكلة'
-  };
-
-  order.driverStatus = status;
-  order.stage = status === 'delivered' ? 'delivered' : 'with_driver';
-
-  order.history.push({
-    stage: status === 'delivered' ? 'delivered' : 'with_driver',
-    by: CURRENT_USER?.name || 'السائق',
-    note: `تحديث من السائق: ${statusLabels[status] || status}${note ? ' - ' + note : ''}`,
-    at: todayISO()
-  });
-
-  saveData();
-  showToast(`تم تحديث حالة الشحنة إلى: ${statusLabels[status] || status}`);
-  render();
-}
-
-// ===== AUTH =====
-function login(username, password) {
-  const user = DATA.users.find(u => u.username === username && u.password === password);
-  if (user) {
-    CURRENT_USER = user;
-    render();
-    return true;
-  }
-  showToast('اسم المستخدم أو كلمة المرور غير صحيحة');
-  return false;
-}
-
-function logout() {
-  CURRENT_USER = null;
-  render();
-}
-
-// ===== RENDER =====
-function render() {
-  const app = document.getElementById('app');
-  if (!LOADED) {
-    app.innerHTML = `<div class="empty"><p>جارِ تحميل البيانات...</p></div>`;
-    return;
-  }
-
-  if (!CURRENT_USER) {
-    app.innerHTML = loginHTML();
-    bindLoginEvents();
-    return;
-  }
-
-  app.innerHTML = headerHTML() + mainContentHTML();
-  bindEvents();
-}
-
-// ===== LOGIN HTML =====
-function loginHTML() {
-  return `
-    <div class="login-container">
-      <div class="login-box">
-        <div class="login-logo">
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23c9a84c'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='900' font-family='Arial'%3ER%3C/text%3E%3C/svg%3E" alt="Rasras Logo">
-          <h1>رصرص للتوكيلات التجارية</h1>
-          <p>Rasras for Commercial Agencies</p>
-        </div>
-        <div class="form-group">
-          <label>اسم المستخدم</label>
-          <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم" value="admin">
-        </div>
-        <div class="form-group">
-          <label>كلمة المرور</label>
-          <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" value="admin123">
-        </div>
-        <button class="btn-login" id="loginBtn">تسجيل الدخول</button>
-        <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--gray);">
-          <p>🔑 حسابات تجريبية:</p>
-          <p>admin / admin123 | sales / sales123</p>
-          <p>logistics / log123 | accounts / acc123</p>
-          <p>warehouse / ware123 | driver1 / driver123</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function bindLoginEvents() {
-  const btn = document.getElementById('loginBtn');
-  if (btn) {
-    btn.onclick = () => {
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-      login(username, password);
-    };
-  }
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const username = document.getElementById('loginUsername')?.value.trim();
-      const password = document.getElementById('loginPassword')?.value.trim();
-      if (username && password) login(username, password);
-    }
-  });
-}
-
-// ===== HEADER =====
-function headerHTML() {
-  const roleLabels = {
-    admin: 'مدير النظام',
-    sales: 'المبيعات',
-    logistics: 'النقل',
-    accounts: 'الحسابات',
-    warehouse: 'المخازن',
-    driver: 'سائق'
-  };
-  const initials = CURRENT_USER.name.split(' ').map(w => w[0]).join('').substring(0, 2);
-
-  return `
-    <div class="header">
-      <div class="header-left">
-        <div class="header-logo">R</div>
-        <div class="header-info">
-          <h2>رصرص للتوكيلات التجارية</h2>
-          <span>Rasras for Commercial Agencies</span>
-        </div>
-      </div>
-      <div class="header-user">
-        <div class="user-badge">
-          <div class="user-avatar">${initials}</div>
-          ${CURRENT_USER.name} · ${roleLabels[CURRENT_USER.role] || CURRENT_USER.role}
-        </div>
-        <button class="btn-logout" id="logoutBtn">تسجيل خروج</button>
-      </div>
-    </div>
-  `;
-}
-
-// ===== MAIN CONTENT =====
-function mainContentHTML() {
-  const role = CURRENT_USER.role;
-
-  // Stats for all roles
-  const totalOrders = DATA.orders.length;
-  const pendingOrders = DATA.orders.filter(o => o.stage !== 'delivered').length;
-  const deliveredOrders = DATA.orders.filter(o => o.stage === 'delivered').length;
-  const myPending = DATA.orders.filter(o => {
-    if (role === 'driver') return o.driverName === CURRENT_USER.name && o.stage === 'with_driver';
-    if (role === 'sales') return o.stage === 'sales_created';
-    if (role === 'logistics') return o.stage === 'logistics_review';
-    if (role === 'accounts') return o.stage === 'accounts_approval';
-    if (role === 'warehouse') return o.stage === 'warehouse_release';
-    return false;
-  });
-
-  let content = '';
-
-  // Stats
-  content += `
-    <div class="stats-grid">
-      <div class="stat-card gold">
-        <div class="stat-number">${totalOrders}</div>
-        <div class="stat-label">إجمالي الأوامر</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-number">${pendingOrders}</div>
-        <div class="stat-label">قيد التنفيذ</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-number">${deliveredOrders}</div>
-        <div class="stat-label">تم التسليم</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-number">${myPending.length}</div>
-        <div class="stat-label">مهامي الحالية</div>
-      </div>
-    </div>
-  `;
-
-  // Tabs
-  const tabs = getTabs(role);
-  content += `<div class="tabs">`;
-  tabs.forEach(t => {
-    const badge = t.badge && t.badge > 0 ? `<span class="badge">${t.badge}</span>` : '';
-    content += `<button class="tab ${t.active ? 'active' : ''}" data-view="${t.view}">${t.label}${badge}</button>`;
-  });
-  content += `</div>`;
-
-  // Content
-  const view = getCurrentView();
-  content += getViewContent(view);
-
-  return content;
-}
-
-function getTabs(role) {
-  const tabs = [];
-  const pendingCount = DATA.orders.filter(o => {
-    if (role === 'driver') return o.driverName === CURRENT_USER.name && o.stage === 'with_driver';
-    if (role === 'sales') return o.stage === 'sales_created';
-    if (role === 'logistics') return o.stage === 'logistics_review';
-    if (role === 'accounts') return o.stage === 'accounts_approval';
-    if (role === 'warehouse') return o.stage === 'warehouse_release';
-    return false;
-  }).length;
-
-  tabs.push({ label: '📊 الرئيسية', view: 'dashboard', active: true, badge: null });
-
-  if (role === 'sales' || role === 'admin') {
-    tabs.push({ label: '➕ أمر جديد', view: 'new_order', active: false, badge: null });
-  }
-
-  if (role === 'driver') {
-    tabs.push({ label: '🚚 شحناتي', view: 'my_orders', active: false, badge: pendingCount });
-    tabs.push({ label: '📋 تحديث حالة', view: 'update_status', active: false, badge: null });
-  } else {
-    tabs.push({ label: '📋 مهامي', view: 'my_tasks', active: false, badge: pendingCount });
-  }
-
-  if (role === 'admin' || role === 'sales') {
-    tabs.push({ label: '👥 العملاء', view: 'customers', active: false, badge: null });
-  }
-
-  return tabs;
-}
-
-function getCurrentView() {
-  // Simple view tracking - default to dashboard
-  return 'dashboard';
-}
-
-function getViewContent(view) {
-  const role = CURRENT_USER.role;
-
-  if (view === 'dashboard') return dashboardHTML();
-  if (view === 'new_order') return newOrderHTML();
-  if (view === 'my_tasks') return myTasksHTML();
-  if (view === 'my_orders' || view === 'update_status') return driverOrdersHTML();
-  if (view === 'customers') return customersHTML();
-
-  return dashboardHTML();
-}
-
-// ===== DASHBOARD =====
-function dashboardHTML() {
-  const recent = DATA.orders.slice(0, 8);
-  let html = `<h2 style="font-size:16px;font-weight:700;margin-bottom:12px;">📦 أحدث الأوامر</h2>`;
-
-  if (recent.length === 0) {
-    html += `<div class="empty"><p>لا توجد أوامر حالياً</p></div>`;
-  } else {
-    recent.forEach(o => {
-      html += orderCardHTML(o);
-    });
-  }
-
-  return html;
-}
-
-// ===== ORDER CARD =====
-function orderCardHTML(o) {
-  const total = o.finalTotal || (o.items.reduce((s, i) => s + i.qty * i.price, 0) + (o.shippingCost || 0));
-  const stage = getStageLabel(o.stage);
-  const isDriver = CURRENT_USER.role === 'driver' && o.driverName === CURRENT_USER.name && o.stage === 'with_driver';
-
-  let actions = '';
-  if (isDriver) {
-    actions = `
-      <div class="driver-actions">
-        <button class="btn-driver btn-delivered" onclick="updateDriverStatus('${o.id}', 'delivered', 'تم التسليم بنجاح')">✅ تم التسليم</button>
-        <button class="btn-driver btn-not-delivered" onclick="updateDriverStatus('${o.id}', 'not_delivered', 'لم يتم التسليم')">❌ لم يتم التسليم</button>
-        <button class="btn-driver btn-problem" onclick="updateDriverStatus('${o.id}', 'problem', 'يوجد مشكلة')">⚠️ يوجد مشكلة</button>
-      </div>
-    `;
-  }
-
-  const whatsappBtn = (o.driverPhone && (o.stage === 'with_driver' || o.stage === 'delivered'))
-    ? `<button class="btn-whatsapp" onclick="sendWhatsAppToDriver(DATA.orders.find(x=>x.id=='${o.id}'))">
-        <svg viewBox="0 0 24 24" fill="white"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm0 18.06h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.14 8.14 0 0 1-1.26-4.36c0-4.49 3.65-8.15 8.15-8.15 2.18 0 4.22.85 5.76 2.39a8.09 8.09 0 0 1 2.39 5.77c0 4.49-3.65 8.23-8.05 8.23Zm4.47-6.12c-.24-.12-1.45-.72-1.68-.8-.22-.08-.39-.12-.55.12-.16.24-.63.8-.78.97-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.44-1.35-1.68-.14-.24-.02-.37.11-.5.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.32-.75-1.81-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04 0 1.2.88 2.36 1 2.52.12.16 1.73 2.64 4.19 3.7.59.25 1.04.4 1.4.52.59.19 1.12.16 1.54.1.47-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
-        إرسال للسائق
-      </button>`
-    : '';
-
-  return `
-    <div class="order-item">
-      <div class="order-header">
-        <div>
-          <div class="order-id">${o.id} · ${o.type === 'sale' ? 'أمر بيع' : 'أمر شراء'}</div>
-          <div class="order-name">${escapeHtml(o.partyName)}</div>
-          <div class="order-meta">${fmtDate(o.createdAt)} · ${fmtMoney(total)} · ${o.paymentMethod}</div>
-        </div>
-        <span class="order-status status-${o.stage}">${stage}</span>
-      </div>
-      ${whatsappBtn}
-      ${actions}
-    </div>
-  `;
-}
-
-// ===== MY TASKS =====
-function myTasksHTML() {
-  const role = CURRENT_USER.role;
-  let orders = [];
-
-  if (role === 'sales') orders = DATA.orders.filter(o => o.stage === 'sales_created');
-  else if (role === 'logistics') orders = DATA.orders.filter(o => o.stage === 'logistics_review');
-  else if (role === 'accounts') orders = DATA.orders.filter(o => o.stage === 'accounts_approval');
-  else if (role === 'warehouse') orders = DATA.orders.filter(o => o.stage === 'warehouse_release');
-  else if (role === 'driver') orders = DATA.orders.filter(o => o.driverName === CURRENT_USER.name && o.stage === 'with_driver');
-  else orders = DATA.orders.filter(o => o.stage !== 'delivered');
-
-  if (orders.length === 0) {
-    return `<div class="empty"><p>✨ لا توجد مهام حالياً</p></div>`;
-  }
-
-  return orders.map(o => orderCardHTML(o)).join('');
-}
-
-// ===== DRIVER ORDERS =====
-function driverOrdersHTML() {
-  const orders = DATA.orders.filter(o => o.driverName === CURRENT_USER.name);
-
-  if (orders.length === 0) {
-    return `<div class="empty"><p>🚚 لا توجد شحنات مسندة إليك</p></div>`;
-  }
-
-  return orders.map(o => orderCardHTML(o)).join('');
-}
-
-// ===== CUSTOMERS =====
-function customersHTML() {
-  const all = [...DATA.customers.map(c => ({ ...c, kind: 'عميل' })), ...DATA.suppliers.map(s => ({ ...s, kind: 'مورد' }))];
-
-  if (all.length === 0) {
-    return `<div class="empty"><p>لا يوجد عملاء أو موردون</p></div>`;
-  }
-
-  return all.map(p => `
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="font-weight:700;font-size:16px;">${escapeHtml(p.name)}</div>
-          <div style="font-size:12px;color:var(--gray);">${p.kind} · ${escapeHtml(p.phone)}</div>
-          <div style="font-size:12px;color:var(--gray);">${p.orderIds?.length || 0} طلب</div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ===== NEW ORDER =====
-function newOrderHTML() {
-  return `
-    <div class="card">
-      <h3 style="margin-bottom:16px;">➕ إنشاء أمر جديد</h3>
-      <div style="display:flex;gap:10px;margin-bottom:16px;">
-        <button class="tab active" style="flex:1;text-align:center;">أمر بيع</button>
-        <button class="tab" style="flex:1;text-align:center;">أمر شراء</button>
-      </div>
-      <div class="form-group">
-        <label>اسم العميل / المورد</label>
-        <input type="text" placeholder="أدخل الاسم">
-      </div>
-      <div class="form-group">
-        <label>رقم التليفون</label>
-        <input type="tel" placeholder="أدخل رقم التليفون">
-      </div>
-      <div class="form-group">
-        <label>العنوان</label>
-        <input type="text" placeholder="أدخل العنوان">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="form-group">
-          <label>طريقة الدفع</label>
-          <select>
-            <option>نقدي</option>
-            <option>شيك</option>
-            <option>تحويل بنكي</option>
-            <option>آجل</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>فاتورة ضريبية</label>
-          <select>
-            <option value="1">نعم</option>
-            <option value="0">لا</option>
-          </select>
-        </div>
-      </div>
-      <div style="border-top:2px solid #e8ecf0;padding-top:16px;margin-top:8px;">
-        <label style="font-weight:700;">الأصناف</label>
-        <div style="margin:8px 0;">
-          <div style="display:grid;grid-template-columns:1fr 80px 100px 30px;gap:8px;margin-bottom:6px;">
-            <input type="text" placeholder="اسم الصنف">
-            <input type="number" placeholder="الكمية" value="1">
-            <input type="number" placeholder="السعر" value="0">
-            <button style="background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;">×</button>
-          </div>
-        </div>
-        <button style="padding:10px;border:2px dashed #e8ecf0;border-radius:12px;background:none;width:100%;font-family:inherit;font-weight:600;color:var(--gray);cursor:pointer;">+ إضافة صنف</button>
-      </div>
-      <button class="btn-login" style="margin-top:16px;">إنشاء الأمر</button>
-    </div>
-  `;
-}
-
-// ===== BIND EVENTS =====
-function bindEvents() {
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) logoutBtn.onclick = logout;
-
-  document.querySelectorAll('.tab').forEach(el => {
-    el.onclick = () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      el.classList.add('active');
-      render();
-    };
-  });
-}
-
-// ===== INIT =====
-async function init() {
-  await loadData();
-  render();
-}
-
-init();
-</script>
-</body>
-</html>
+    <div id="app"></div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============ API Client ============
+        const API = {
+            async request(endpoint, options = {}) {
+                const response = await fetch(`/api${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(options.headers || {})
+                    }
+                });
+                return response.json();
+            },
+            
+            async login(username, password) {
+                return this.request('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+            },
+            
+            async getData() {
+                return this.request('/data');
+            },
+            
+            async getStats() {
+                return this.request('/stats');
+            },
+            
+            async createOrder(order) {
+                return this.request('/orders', {
+                    method: 'POST',
+                    body: JSON.stringify(order)
+                });
+            },
+            
+            async updateOrder(id, data) {
+                return this.request(`/orders/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+            },
+            
+            async updateDriverStatus(id, status, note) {
+                return this.request(`/orders/${id}/driver-status`, {
+                    method: 'POST',
+                    body: JSON.stringify({ status, note })
+                });
+            },
+            
+            async sendWhatsApp(orderId, phone, message) {
+                return this.request('/whatsapp/send', {
+                    method: 'POST',
+                    body: JSON.stringify({ orderId, phone, message })
+                });
+            }
+        };
+
+        // ============ State ============
+        let state = {
+            user: null,
+            data: null,
+            view: 'dashboard',
+            loading: false
+        };
+
+        // ============ Helpers ============
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timeout);
+            t._timeout = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function formatMoney(n) {
+            return Number(n || 0).toLocaleString('ar-EG') + ' ج.م';
+        }
+
+        function escapeHtml(s) {
+            return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+        }
+
+        function getStageLabel(stage) {
+            const stages = {
+                'sales_created': 'تم الإنشاء',
+                'logistics_review': 'مراجعة النقل',
+                'accounts_approval': 'اعتماد الحسابات',
+                'warehouse_release': 'إذن الصرف',
+                'with_driver': 'مع السائق',
+                'delivered': 'تم التسليم'
+            };
+            return stages[stage] || stage;
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(w => w[0]).join('').substring(0, 2);
+        }
+
+        // ============ Render Functions ============
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (!state.user) {
+                app.innerHTML = renderLogin();
+                bindLoginEvents();
+                return;
+            }
+            
+            if (!state.data) {
+                app.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>جارِ تحميل البيانات...</p></div>';
+                loadData();
+                return;
+            }
+            
+            app.innerHTML = `
+                ${renderHeader()}
+                <div class="container">
+                    ${renderStats()}
+                    ${renderTabs()}
+                    ${renderView()}
+                </div>
+            `;
+            
+            bindEvents();
+        }
+
+        // ============ Login ============
+        function renderLogin() {
+            return `
+                <div class="login-page">
+                    <div class="login-card">
+                        <div class="logo">
+                            <div class="brand">R</div>
+                            <h1>رصرص للتوكيلات التجارية</h1>
+                            <p>Rasras for Commercial Agencies</p>
+                        </div>
+                        <div class="form-group">
+                            <label>اسم المستخدم</label>
+                            <input type="text" id="loginUser" placeholder="أدخل اسم المستخدم" value="admin">
+                        </div>
+                        <div class="form-group">
+                            <label>كلمة المرور</label>
+                            <input type="password" id="loginPass" placeholder="أدخل كلمة المرور" value="admin123">
+                        </div>
+                        <button class="btn-primary" id="loginBtn">تسجيل الدخول</button>
+                        <div style="text-align:center;margin-top:16px;font-size:11px;color:#7f8c8d;">
+                            <p>🔑 admin / admin123 | sales / sales123</p>
+                            <p>logistics / log123 | accounts / acc123</p>
+                            <p>warehouse / ware123 | driver1 / driver123</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function bindLoginEvents() {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginUser = document.getElementById('loginUser');
+            const loginPass = document.getElementById('loginPass');
+            
+            const doLogin = async () => {
+                const username = loginUser.value.trim();
+                const password = loginPass.value.trim();
+                if (!username || !password) {
+                    showToast('يرجى إدخال اسم المستخدم وكلمة المرور');
+                    return;
+                }
+                
+                try {
+                    const result = await API.login(username, password);
+                    if (result.success) {
+                        state.user = result.user;
+                        showToast(`مرحباً ${result.user.name}`);
+                        render();
+                    } else {
+                        showToast(result.message || 'بيانات الدخول غير صحيحة');
+                    }
+                } catch (error) {
+                    showToast('حدث خطأ في الاتصال بالخادم');
+                }
+            };
+            
+            loginBtn.onclick = doLogin;
+            loginPass.onkeydown = (e) => { if (e.key === 'Enter') doLogin(); };
+            loginUser.onkeydown = (e) => { if (e.key === 'Enter') loginPass.focus(); };
+        }
+
+        // ============ Header ============
+        function renderHeader() {
+            const initials = getInitials(state.user.name);
+            const roleLabels = {
+                admin: 'مدير النظام',
+                sales: 'المبيعات',
+                logistics: 'النقل',
+                accounts: 'الحسابات',
+                warehouse: 'المخازن',
+                driver: 'سائق'
+            };
+            
+            return `
+                <div class="container">
+                    <div class="header">
+                        <div class="header-brand">
+                            <div class="brand-icon">R</div>
+                            <div>
+                                <h2>رصرص للتوكيلات التجارية</h2>
+                                <span>Rasras for Commercial Agencies</span>
+                            </div>
+                        </div>
+                        <div class="header-user">
+                            <div class="user-info">
+                                <div class="avatar">${initials}</div>
+                                ${state.user.name} · ${roleLabels[state.user.role] || state.user.role}
+                            </div>
+                            <button class="btn-logout" id="logoutBtn">تسجيل خروج</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ Stats ============
+        function renderStats() {
+            const orders = state.data.orders || [];
+            const total = orders.length;
+            const pending = orders.filter(o => o.stage !== 'delivered').length;
+            const delivered = orders.filter(o => o.stage === 'delivered').length;
+            const myTasks = getMyTasks().length;
+            
+            return `
+                <div class="stats-grid">
+                    <div class="stat-card gold">
+                        <div class="number">${total}</div>
+                        <div class="label">📦 إجمالي الأوامر</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="number">${pending}</div>
+                        <div class="label">⏳ قيد التنفيذ</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="number">${delivered}</div>
+                        <div class="label">✅ تم التسليم</div>
