@@ -3,728 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASRAS Material Raw - نظام إدارة الطلبات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>RASRAS Material Raw</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Cairo',sans-serif;background:#f0f2f5;color:#1c2530}
-        :root{--primary:#1a2a3a;--primary-light:#2c3e50;--accent:#c08a2e;--success:#2b7a6c;--warning:#c08a2e;--danger:#b23b3b;--bg:#f0f2f5;--card:#ffffff;--border:#dde2e8;--gold:#c08a2e;--gold-light:#faf1de}
-        .app{max-width:820px;margin:0 auto;padding:16px;padding-bottom:80px}
-        .header{display:flex;align-items:center;justify-content:space-between;padding:12px 0 16px;border-bottom:2px solid var(--border);margin-bottom:16px;flex-wrap:wrap;gap:10px;background:linear-gradient(135deg,#f8f9fa 0%,#ffffff 100%);border-radius:16px;padding:16px 20px}
-        .brand{display:flex;align-items:center;gap:14px}
-        .brand-icon{background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;border-radius:14px;width:56px;height:56px;flex-shrink:0;box-shadow:0 4px 12px rgba(26,42,58,0.2);position:relative;overflow:hidden}
-        .brand-icon::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 50%);transform:rotate(45deg)}
-        .brand-icon .logo-text{display:flex;flex-direction:column;align-items:center;line-height:1;font-size:15px;font-weight:900;letter-spacing:0.5px;z-index:1}
-        .brand-icon .logo-text .r{font-size:18px}
-        .brand-icon .logo-text .as{font-size:9px;letter-spacing:3px;opacity:0.9}
-        .brand-icon .logo-year{position:absolute;bottom:4px;right:6px;font-size:7px;font-weight:700;opacity:0.5;letter-spacing:0.5px;z-index:1}
-        .brand h1{font-size:17px;margin:0;font-weight:800;color:#1a2a3a;line-height:1.2}
-        .brand h1 .sub-en{font-size:10px;font-weight:600;color:#5b6b81;display:block;letter-spacing:0.5px;margin-top:1px}
-        .brand p{font-size:11px;margin:2px 0 0;color:#5b6b81;font-weight:600}
-        .brand .brand-tag{display:inline-block;background:var(--gold-light);color:var(--gold);padding:2px 10px;border-radius:20px;font-size:9px;font-weight:700;margin-top:2px}
-        .user-info{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;flex-wrap:wrap}
-        .user-info .role-badge{background:var(--gold);color:#fff;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700}
-        .user-info button{background:var(--danger);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700;transition:all 0.2s}
-        .user-info button:hover{opacity:0.85;transform:scale(0.97)}
-        .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-        .tab{flex:0 0 auto;background:none;border:none;font-family:inherit;font-size:13px;font-weight:700;color:#5b6b81;padding:8px 16px;cursor:pointer;border-radius:10px;transition:all 0.2s;white-space:nowrap}
-        .tab.active{background:var(--primary);color:#fff}
-        .tab:hover:not(.active){background:#eaeef3}
-        .tab .badge{background:var(--warning);color:#fff;font-size:10px;padding:1px 8px;border-radius:20px;margin-right:4px}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;transition:all 0.2s}
-        .card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.04)}
-        .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
-        .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;transition:all 0.2s}
-        .stat:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.04)}
-        .stat b{display:block;font-size:22px;font-weight:800}
-        .stat span{font-size:11px;color:#5b6b81}
-        .stat .icon{font-size:24px;display:block;margin-bottom:4px}
-        label{display:block;font-size:12.5px;font-weight:700;color:#3d4a5c;margin:12px 0 5px}
-        input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;background:#fbfbfc;color:var(--primary);transition:all 0.2s}
-        input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(192,138,46,0.1)}
-        .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-        .btn-primary{width:100%;padding:13px;border-radius:11px;border:none;background:var(--primary);color:#fff;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;margin-top:16px;transition:all 0.2s}
-        .btn-primary:hover{background:var(--primary-light);transform:scale(1.01)}
-        .btn-primary:disabled{opacity:0.5}
-        .btn-success{background:var(--success)}
-        .btn-success:hover{background:#1e5f52}
-        .btn-warning{background:var(--warning)}
-        .btn-warning:hover{background:#a77520}
-        .btn-danger{background:var(--danger)}
-        .btn-danger:hover{background:#922e2e}
-        .btn-gold{background:var(--gold)}
+        body{font-family:'Cairo',sans-serif;background:#f0f2f5;color:#1c2530;display:flex;justify-content:center;align-items:center;min-height:100vh}
+        .container{max-width:400px;width:100%;padding:20px}
+        .card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+        .logo{text-align:center;margin-bottom:24px}
+        .logo .big{display:inline-block;background:#1a2a3a;color:#fff;padding:12px 20px;border-radius:12px;font-size:24px;font-weight:900}
+        .logo h2{font-size:20px;margin-top:12px}
+        .logo p{color:#5b6b81;font-size:13px}
+        label{display:block;font-size:13px;font-weight:700;color:#3d4a5c;margin:12px 0 4px}
+        input{width:100%;padding:10px 12px;border:1px solid #dde2e8;border-radius:10px;font-size:14px}
+        input:focus{outline:none;border-color:#c08a2e}
+        .btn{width:100%;padding:12px;border:none;border-radius:10px;background:#1a2a3a;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
+        .btn:hover{background:#2c3e50}
+        .btn-gold{background:#c08a2e}
         .btn-gold:hover{background:#a77520}
-        .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
-        .btn-outline:hover{background:var(--primary);color:#fff}
-        .order-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:9px;cursor:pointer;transition:all 0.2s}
-        .order-item:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(192,138,46,0.1);transform:translateX(-4px)}
-        .order-item.closed{opacity:0.7;background:#f5f6f8}
-        .order-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
-        .order-id{font-size:12px;color:#5b6b81;font-weight:600}
-        .order-name{font-size:15px;font-weight:700;margin-top:2px}
-        .order-meta{font-size:12px;color:#5b6b81;margin-top:4px}
-        .pill{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
-        .pill.pending{background:#faf1de;color:#c08a2e}
-        .pill.delivered{background:#e4f2ee;color:#2b7a6c}
-        .pill.partial{background:#fff3e0;color:#e65100}
-        .pill.withdriver{background:#dbeafe;color:#1a56db}
-        .pill.closed{background:#e5e7eb;color:#4b5563}
-        .pill.debt{background:#fce4ec;color:#c62828}
-        .pill.failed{background:#fce4ec;color:#c62828}
-        .pill.gold{background:var(--gold-light);color:var(--gold)}
-        .empty{text-align:center;padding:40px 16px;color:#5b6b81}
-        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 24px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,0.2);z-index:100;opacity:0;transition:all 0.3s;pointer-events:none}
-        .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+        .sub{text-align:center;color:#5b6b81;font-size:13px;margin-top:12px}
+        .sub a{color:#c08a2e;font-weight:700;text-decoration:none}
         .hidden{display:none!important}
-        .whatsapp-btn{background:#25D366;color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s}
-        .whatsapp-btn:hover{background:#1da851;transform:scale(1.02)}
-        .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-        .kv{background:#eaeef3;border-radius:10px;padding:9px 11px;transition:all 0.2s}
-        .kv:hover{background:#dde2e8}
-        .kv span{display:block;font-size:10.5px;color:#5b6b81;font-weight:700;margin-bottom:2px}
-        .kv b{font-size:13px}
-        .history-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
-        .history-item:last-child{border-bottom:none}
-        .history-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0}
-        .login-container{max-width:420px;margin:60px auto;padding:35px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.08);border:1px solid var(--border)}
-        .login-container .login-logo{text-align:center;margin-bottom:24px}
-        .login-container .login-logo .big-logo{display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;background:var(--primary);border-radius:18px;color:#fff;font-size:24px;font-weight:900;letter-spacing:1px;box-shadow:0 4px 16px rgba(26,42,58,0.15)}
-        .login-container .login-logo .big-logo span{display:flex;flex-direction:column;align-items:center;line-height:1.1}
-        .login-container .login-logo .big-logo .r{font-size:28px}
-        .login-container .login-logo .big-logo .as{font-size:11px;letter-spacing:3px;opacity:0.8}
-        .login-container .login-logo h2{margin-top:12px;font-size:20px;font-weight:800;color:var(--primary)}
-        .login-container .login-logo p{color:#5b6b81;font-size:13px;margin-top:2px}
-        .login-container .sub{text-align:center;color:#5b6b81;font-size:13px;margin-top:12px}
-        .login-container .sub a{color:var(--gold);font-weight:700;text-decoration:none}
-        .login-container .sub a:hover{text-decoration:underline}
-        .role-selector{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-        .role-selector button{flex:1;padding:8px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;font-family:inherit;font-size:12px;font-weight:700;color:#5b6b81;cursor:pointer;transition:all 0.2s;min-width:80px}
-        .role-selector button.active{border-color:var(--gold);background:var(--gold-light);color:var(--gold)}
-        .role-selector button:hover:not(.active){border-color:var(--gold)}
-        .followup-item{background:#f8f9fa;border-radius:10px;padding:10px 12px;margin-bottom:6px;border-right:3px solid var(--gold)}
-        .followup-item small{color:#5b6b81;font-size:11px}
-        .driver-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-        .driver-actions .btn-row{display:flex;gap:8px;flex-wrap:wrap}
-        .driver-actions .btn-row button{flex:1;min-width:100px;padding:10px;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;transition:all 0.2s;font-size:13px}
-        .driver-actions .btn-row .btn-deliver{background:var(--success);color:#fff}
-        .driver-actions .btn-row .btn-deliver:hover{background:#1e5f52}
-        .driver-actions .btn-row .btn-partial{background:var(--warning);color:#fff}
-        .driver-actions .btn-row .btn-partial:hover{background:#a77520}
-        .driver-actions .btn-row .btn-fail{background:var(--danger);color:#fff}
-        .driver-actions .btn-row .btn-fail:hover{background:#922e2e}
-        .partial-input{display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap}
-        .partial-input.show{display:flex}
-        .partial-input input{flex:1;min-width:120px}
-        .partial-input button{padding:10px 20px;border:none;border-radius:10px;background:var(--success);color:#fff;font-weight:700;cursor:pointer}
-        .footer-credit{text-align:center;padding:20px 0 10px;font-size:11px;color:#5b6b81;border-top:1px solid var(--border);margin-top:20px}
-        .footer-credit strong{color:var(--gold)}
-        .user-mgmt-card{background:#f8f9fa;border:2px solid var(--gold);border-radius:14px;padding:16px;margin-bottom:12px}
-        .user-mgmt-card h3{color:var(--gold);margin-bottom:12px}
-        .user-list-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
-        .user-list-item:last-child{border-bottom:none}
-        .user-list-item .role-tag{font-size:11px;padding:2px 10px;border-radius:20px;background:var(--gold-light);color:var(--gold)}
-        @media (max-width:600px){.row2{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.role-selector button{font-size:11px;padding:6px 8px}.driver-actions .btn-row button{min-width:70px;font-size:11px;padding:8px}.brand h1{font-size:14px}.brand-icon{width:44px;height:44px}.brand-icon .logo-text{font-size:12px}.brand-icon .logo-text .as{font-size:7px}.header{padding:12px 14px}}
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a2a3a;color:#fff;padding:10px 24px;border-radius:30px;font-size:13px;z-index:100;opacity:0;transition:all 0.3s;pointer-events:none}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+        .dashboard{max-width:820px;margin:0 auto;padding:16px}
+        .header{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:2px solid #dde2e8;flex-wrap:wrap;gap:10px}
+        .brand{display:flex;align-items:center;gap:10px}
+        .brand-icon{background:#1a2a3a;color:#fff;padding:8px 14px;border-radius:10px;font-weight:900;font-size:18px}
+        .brand h1{font-size:16px}
+        .brand p{font-size:11px;color:#5b6b81}
+        .user-info{display:flex;align-items:center;gap:10px;font-size:13px}
+        .user-info button{background:#b23b3b;color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:700}
+        .tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:1px solid #dde2e8;flex-wrap:wrap}
+        .tab{padding:8px 16px;border-radius:10px;border:none;background:none;font-weight:700;cursor:pointer;font-size:13px;color:#5b6b81}
+        .tab.active{background:#1a2a3a;color:#fff}
+        .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin:14px 0}
+        .stat{background:#fff;border:1px solid #dde2e8;border-radius:12px;padding:12px;text-align:center}
+        .stat b{font-size:20px;display:block}
+        .stat span{font-size:11px;color:#5b6b81}
+        .order-item{background:#fff;border:1px solid #dde2e8;border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer}
+        .order-item:hover{border-color:#c08a2e}
+        .order-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+        .order-name{font-weight:700}
+        .order-meta{font-size:12px;color:#5b6b81}
+        .pill{font-size:11px;font-weight:700;padding:2px 12px;border-radius:20px;background:#faf1de;color:#c08a2e}
+        .pill.delivered{background:#e4f2ee;color:#2b7a6c}
+        .empty{text-align:center;padding:30px;color:#5b6b81}
+        .footer{text-align:center;padding:20px 0;font-size:11px;color:#5b6b81;border-top:1px solid #dde2e8;margin-top:20px}
+        .footer strong{color:#c08a2e}
+        @media(max-width:600px){.container{padding:10px}}
     </style>
 </head>
 <body>
     <div class="toast" id="toast"></div>
-    <div id="loginContainer" class="login-container">
-        <div class="login-logo">
-            <div class="big-logo"><span><span class="r">R</span><span class="as">AS</span></span></div>
-            <h2>رصرص للتوكيلات التجارية</h2>
-            <p>RASRAS Material Raw</p>
-        </div>
-        <div id="loginForm">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="loginEmail" placeholder="example@email.com">
-            <label>كلمة المرور</label>
-            <input type="password" id="loginPassword" placeholder="********">
-            <button class="btn-primary btn-gold" id="loginBtn">دخول</button>
-            <div class="sub">ليس لديك حساب؟ <a href="#" id="showRegisterBtn">سجل الآن</a></div>
-        </div>
-        <div id="registerForm" class="hidden">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="regEmail" placeholder="example@email.com">
-            <label>كلمة المرور</label>
-            <input type="password" id="regPassword" placeholder="********">
-            <label>الدور (اختياري)</label>
-            <select id="regRole">
-                <option value="manager">🚚 مدير النقل</option>
-                <option value="sales">📋 مندوب مبيعات</option>
-                <option value="warehouse">🏚️ مخازن</option>
-                <option value="viewer">👀 مشاهد</option>
-            </select>
-            <button class="btn-primary btn-gold" id="registerBtn">إنشاء حساب</button>
-            <div class="sub">لديك حساب؟ <a href="#" id="showLoginBtn">سجل دخول</a></div>
+
+    <!-- ===== LOGIN ===== -->
+    <div id="loginContainer" class="container">
+        <div class="card">
+            <div class="logo">
+                <div class="big">RAS</div>
+                <h2>رصرص للتوكيلات التجارية</h2>
+                <p>RASRAS Material Raw</p>
+            </div>
+            <div id="loginForm">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="loginEmail" placeholder="admin@rasras.com">
+                <label>كلمة المرور</label>
+                <input type="password" id="loginPassword" placeholder="********">
+                <button class="btn btn-gold" id="loginBtn">دخول</button>
+                <div class="sub">ليس لديك حساب؟ <a href="#" id="showRegisterBtn">سجل الآن</a></div>
+            </div>
+            <div id="registerForm" class="hidden">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="regEmail" placeholder="admin@rasras.com">
+                <label>كلمة المرور</label>
+                <input type="password" id="regPassword" placeholder="********">
+                <button class="btn btn-gold" id="registerBtn">إنشاء حساب</button>
+                <div class="sub">لديك حساب؟ <a href="#" id="showLoginBtn">سجل دخول</a></div>
+            </div>
         </div>
     </div>
+
+    <!-- ===== DASHBOARD ===== -->
     <div id="appContainer" class="hidden">
-        <div class="app">
+        <div class="dashboard">
             <div class="header">
                 <div class="brand">
-                    <div class="brand-icon"><span class="logo-text"><span class="r">R</span><span class="as">AS</span></span><span class="logo-year">2016</span></div>
-                    <div><h1>رصرص للتوكيلات التجارية<span class="sub-en">RASRAS Material Raw</span></h1><p>نظام إدارة الطلبات والمتابعة</p><span class="brand-tag">⭐ الذهبية</span></div>
+                    <div class="brand-icon">RAS</div>
+                    <div><h1>رصرص للتوكيلات التجارية</h1><p>RASRAS Material Raw · نظام الطلبات</p></div>
                 </div>
                 <div class="user-info">
-                    <span class="role-badge" id="roleBadge">🚚 مدير نقل</span>
                     <span id="userEmailDisplay">user@email.com</span>
                     <button id="logoutBtn">تسجيل خروج</button>
                 </div>
-            </div>
-            <div class="role-selector" id="roleSelector">
-                <button class="active" data-role="manager">🚚 مدير النقل</button>
-                <button data-role="sales">📋 مندوب مبيعات</button>
-                <button data-role="warehouse">🏚️ مخازن</button>
-                <button data-role="viewer">👀 مشاهد</button>
             </div>
             <div class="tabs" id="tabsContainer">
                 <button class="tab active" data-tab="dashboard">📊 الرئيسية</button>
                 <button class="tab" data-tab="new">➕ طلب جديد</button>
                 <button class="tab" data-tab="orders">📋 الطلبات</button>
-                <button class="tab" data-tab="reports">📈 التقارير</button>
-                <button class="tab" data-tab="users" id="usersTab">👥 المستخدمين</button>
             </div>
             <div id="viewDashboard" class="view"></div>
             <div id="viewNew" class="view hidden"></div>
             <div id="viewOrders" class="view hidden"></div>
-            <div id="viewReports" class="view hidden"></div>
-            <div id="viewUsers" class="view hidden"></div>
-            <div id="viewDetail" class="view hidden"></div>
-            <div class="footer-credit">© 2026 <strong>RASRAS Material Raw</strong> - رصرص للتوكيلات التجارية</div>
+            <div class="footer">© 2026 <strong>RASRAS Material Raw</strong> - رصرص للتوكيلات التجارية</div>
         </div>
     </div>
+
     <script type="module">
         import { Client, Account, Databases, ID } from "https://cdn.jsdelivr.net/npm/appwrite@latest";
         const PROJECT_ID = '6a98cf310022ce38f1c4';
         const DATABASE_ID = 'orders_db';
         const COLLECTION_ID = 'orders_collection';
-        const USERS_COLLECTION = 'users_collection';
-
         const client = new Client().setEndpoint('https://fra.cloud.appwrite.io/v1').setProject(PROJECT_ID);
         const account = new Account(client);
         const databases = new Databases(client);
         window.account = account; window.databases = databases; window.client = client; window.ID = ID;
 
-        const state = {
-            user: null,
-            orders: [],
-            users: [],
-            currentTab: 'dashboard',
-            selectedOrderId: null,
-            userRole: 'manager',
-            draft: {
-                customerName: '',
-                phone: '',
-                address: '',
-                items: [{ name: '', qty: 1, price: 0 }],
-                paymentMethod: 'نقدي',
-                debtPeriod: 0,
-                dueDate: null,
-                willCollect: true,
-                collectAmount: 0,
-                notes: '',
-                driverPhone: ''
-            }
-        };
+        const state = { user: null, orders: [], currentTab: 'dashboard', draft: { customerName: '', phone: '', address: '', items: [{ name: '', qty: 1, price: 0 }], paymentMethod: 'نقدي', willCollect: true, collectAmount: 0, notes: '' } };
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(t._timer);
-            t._timer = setTimeout(() => t.classList.remove('show'), 3000);
-        }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 3000); }
+        function fmtMoney(n) { return Number(n || 0).toLocaleString('ar-EG') + ' ج.م'; }
+        function fmtDate(iso) { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }); }
+        function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function generateOrderId() { return 'RAS-' + String(Date.now()).slice(-8) + '-' + String(Math.floor(Math.random() * 9000) + 1000); }
 
-        function fmtMoney(n) {
-            return Number(n || 0).toLocaleString('ar-EG') + ' ج.م';
-        }
-
-        function fmtDate(iso) {
-            if (!iso) return '—';
-            const d = new Date(iso);
-            return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
-        }
-
-        function fmtDateTime(iso) {
-            if (!iso) return '—';
-            const d = new Date(iso);
-            return d.toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-
-        function escapeHtml(s) {
-            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } [c]));
-        }
-
-        function generateOrderId() {
-            return 'RAS-' + String(Date.now()).slice(-8) + '-' + String(Math.floor(Math.random() * 9000) + 1000);
-        }
-
-        function calculateDueDate(debtPeriod) {
-            if (!debtPeriod || debtPeriod <= 0) return null;
-            const d = new Date();
-            d.setDate(d.getDate() + Number(debtPeriod));
-            return d.toISOString();
-        }
-
-        function isOverdue(dueDate) {
-            if (!dueDate) return false;
-            return new Date(dueDate) < new Date();
-        }
-
-        function getStatusText(status) {
-            const map = { 'pending': 'قيد التنفيذ', 'with_driver': 'مع السائق', 'delivered': 'تم التسليم', 'partial': 'تسليم جزئي', 'failed': 'فشل التسليم', 'closed': 'مغلقة' };
-            return map[status] || status;
-        }
-
-        function buildWhatsAppMessage(order) {
-            const itemsText = order.items.map(i => `• ${i.name} × ${i.qty} = ${fmtMoney(i.qty * i.price)}`).join('\n');
-            const collectText = order.willCollect ? `✅ سيستلم ${fmtMoney(order.collectAmount)} (${order.paymentMethod})` : '❌ لا يستلم مبلغ';
-            const debtText = order.paymentMethod === 'آجل' ? `\n📅 آجل: استحقاق ${fmtDate(order.dueDate)}` : '';
-            const appUrl = window.location.origin + window.location.pathname;
-            return `🚚 *إشعار شحنة جديدة - RASRAS Material Raw* 🚚\n\n📋 رقم الطلب: ${order.orderId}\n👤 العميل: ${order.customerName}\n📞 التليفون: ${order.phone}\n📍 العنوان: ${order.address}\n\n📦 *الأصناف:*\n${itemsText}\n\n💰 ${collectText}${debtText}\n\n📝 ملاحظات: ${order.notes || 'لا توجد'}\n\n⏰ تاريخ الإرسال: ${fmtDateTime(order.createdAt)}\n\n---\n*🔘 إجراءات التسليم:*\n1️⃣ ✅ تم التسليم كاملاً\n2️⃣ ⚠️ تم التسليم جزئياً (اكتب الكمية بالكيلو)\n3️⃣ ❌ لم يتم التسليم\n\n📱 للتحديث: اضغط على الرابط التالي\n${appUrl}?order=${order.$id}\n\nشكراً لتعاونك - رصرص للتوكيلات التجارية`;
-        }
-
-        function sendWhatsApp(driverPhone, order) {
-            if (!driverPhone || driverPhone.length < 10) { showToast('❌ أدخل رقم هاتف صحيح'); return; }
-            let phone = driverPhone.replace(/[^0-9]/g, '');
-            if (phone.startsWith('0')) phone = '2' + phone;
-            if (!phone.startsWith('2')) phone = '2' + phone;
-            const msg = buildWhatsAppMessage(order);
-            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-            showToast('✅ تم فتح واتساب مع السائق');
-        }
-
-        // ========== LOAD USERS ==========
-        async function loadUsers() {
-            try {
-                const response = await databases.listDocuments(DATABASE_ID, USERS_COLLECTION);
-                state.users = response.documents.map(d => ({ ...d, $id: d.$id }));
-            } catch (e) {
-                console.warn('⚠️ فشل تحميل المستخدمين:', e);
-                state.users = [];
-            }
-            renderUsers();
-        }
-
-        // ========== CREATE USER ==========
-        async function createUserInDB(email, role) {
-            try {
-                const doc = await databases.createDocument(DATABASE_ID, USERS_COLLECTION, ID.unique(), {
-                    email: email,
-                    role: role,
-                    createdAt: new Date().toISOString()
-                });
-                state.users.push(doc);
-                renderUsers();
-                showToast('✅ تم إضافة المستخدم بنجاح');
-                return doc;
-            } catch (e) {
-                showToast('❌ خطأ: ' + e.message);
-                return null;
-            }
-        }
-
-        // ========== LOAD ORDERS ==========
         async function loadOrders() {
-            try {
-                const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
-                state.orders = response.documents.map(d => ({ ...d, $id: d.$id }));
-                renderAll();
-            } catch (e) {
-                console.warn('⚠️ فشل تحميل الطلبات:', e);
-                state.orders = [];
-                renderAll();
-            }
+            try { const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID); state.orders = response.documents.map(d => ({ ...d, $id: d.$id })); renderAll(); } catch (e) { state.orders = []; renderAll(); }
         }
-
         async function createOrder(orderData) {
-            try {
-                const doc = await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), orderData);
-                state.orders.unshift(doc);
-                renderAll();
-                showToast('✅ تم إنشاء الطلب بنجاح');
-                return doc;
-            } catch (e) {
-                showToast('❌ خطأ: ' + e.message);
-                console.error(e);
-                return null;
-            }
+            try { const doc = await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), orderData); state.orders.unshift(doc); renderAll(); showToast('✅ تم إنشاء الطلب'); return doc; } catch (e) { showToast('❌ ' + e.message); return null; }
         }
 
-        async function updateOrder(orderId, data) {
-            try {
-                const doc = await databases.updateDocument(DATABASE_ID, COLLECTION_ID, orderId, data);
-                const idx = state.orders.findIndex(o => o.$id === orderId);
-                if (idx !== -1) state.orders[idx] = doc;
-                renderAll();
-                showToast('✅ تم التحديث');
-                return doc;
-            } catch (e) {
-                showToast('❌ خطأ: ' + e.message);
-                return null;
-            }
-        }
-
-        // ========== DRIVER ACTIONS ==========
-        async function driverDeliverFull(orderId) {
-            const order = state.orders.find(o => o.$id === orderId);
-            if (!order) return;
-            const history = order.history || [];
-            history.push({ note: '✅ تم التسليم كاملاً بواسطة السائق', by: 'السائق', at: new Date().toISOString() });
-            await updateOrder(orderId, {
-                status: 'delivered',
-                deliveryStatus: 'full',
-                deliveredAt: new Date().toISOString(),
-                deliveryNotes: 'تم التسليم كاملاً',
-                isClosed: true,
-                closedAt: new Date().toISOString(),
-                history: history
-            });
-            showToast('✅ تم تسجيل التسليم الكامل');
-        }
-
-        async function driverDeliverPartial(orderId, partialQty) {
-            const order = state.orders.find(o => o.$id === orderId);
-            if (!order) return;
-            const history = order.history || [];
-            history.push({ note: `⚠️ تم التسليم جزئياً: ${partialQty} كيلو`, by: 'السائق', at: new Date().toISOString() });
-            await updateOrder(orderId, {
-                status: 'partial',
-                deliveryStatus: 'partial',
-                partialQty: Number(partialQty) || 0,
-                deliveredAt: new Date().toISOString(),
-                deliveryNotes: `تم التسليم جزئياً: ${partialQty} كيلو`,
-                isClosed: false,
-                history: history
-            });
-            showToast(`⚠️ تم تسجيل التسليم الجزئي: ${partialQty} كيلو`);
-        }
-
-        async function driverDeliverFail(orderId, reason) {
-            const order = state.orders.find(o => o.$id === orderId);
-            if (!order) return;
-            const history = order.history || [];
-            history.push({ note: `❌ لم يتم التسليم: ${reason || 'لا يوجد سبب'}`, by: 'السائق', at: new Date().toISOString() });
-            await updateOrder(orderId, {
-                status: 'failed',
-                deliveryStatus: 'failed',
-                deliveryNotes: reason || 'لم يتم التسليم',
-                isClosed: false,
-                history: history
-            });
-            showToast('❌ تم تسجيل فشل التسليم');
-        }
-
-        // ========== AUTH ==========
         async function checkUser() {
-            try {
-                const user = await account.get();
-                state.user = user;
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').textContent = user.email;
-                const urlParams = new URLSearchParams(window.location.search);
-                const orderId = urlParams.get('order');
-                if (orderId) { state.selectedOrderId = orderId; state.currentTab = 'detail'; }
-                await loadOrders();
-                await loadUsers();
-                // إظهار تبويب المستخدمين للمدير فقط
-                const usersTab = document.getElementById('usersTab');
-                if (state.userRole === 'manager') {
-                    usersTab.style.display = 'block';
-                } else {
-                    usersTab.style.display = 'none';
-                }
-            } catch (e) {
-                state.user = null;
-                document.getElementById('loginContainer').classList.remove('hidden');
-                document.getElementById('appContainer').classList.add('hidden');
-            }
+            try { const user = await account.get(); state.user = user; document.getElementById('loginContainer').classList.add('hidden'); document.getElementById('appContainer').classList.remove('hidden'); document.getElementById('userEmailDisplay').textContent = user.email; await loadOrders(); } catch (e) { state.user = null; document.getElementById('loginContainer').classList.remove('hidden'); document.getElementById('appContainer').classList.add('hidden'); }
         }
 
         document.getElementById('loginBtn').addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPassword').value;
-            try {
-                await account.createEmailPasswordSession(email, pass);
-                showToast('✅ مرحباً بك!');
-                checkUser();
-            } catch (e) {
-                showToast('❌ ' + e.message);
-            }
+            try { await account.createEmailPasswordSession(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); showToast('✅ مرحباً!'); checkUser(); } catch (e) { showToast('❌ ' + e.message); }
         });
-
         document.getElementById('registerBtn').addEventListener('click', async () => {
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPassword').value;
-            const role = document.getElementById('regRole').value;
-            if (!email || !pass) { showToast('❌ أدخل البريد وكلمة المرور'); return; }
-            try {
-                await account.create(ID.unique(), email, pass);
-                await createUserInDB(email, role);
-                showToast('✅ تم إنشاء الحساب، سجل دخول الآن');
-                document.getElementById('registerForm').classList.add('hidden');
-                document.getElementById('loginForm').classList.remove('hidden');
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regPassword').value = '';
-            } catch (e) {
-                showToast('❌ ' + e.message);
-            }
+            try { await account.create(ID.unique(), document.getElementById('regEmail').value, document.getElementById('regPassword').value); showToast('✅ تم إنشاء الحساب، سجل دخول'); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); } catch (e) { showToast('❌ ' + e.message); }
         });
+        document.getElementById('showRegisterBtn').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); });
+        document.getElementById('showLoginBtn').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); });
+        document.getElementById('logoutBtn').addEventListener('click', async () => { try { await account.deleteSession('current'); state.user = null; showToast('👋 تم تسجيل الخروج'); checkUser(); } catch (e) { showToast('❌ ' + e.message); } });
 
-        document.getElementById('showRegisterBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.remove('hidden');
-        });
-
-        document.getElementById('showLoginBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            try {
-                await account.deleteSession('current');
-                state.user = null;
-                showToast('👋 تم تسجيل الخروج');
-                checkUser();
-            } catch (e) {
-                showToast('❌ ' + e.message);
-            }
-        });
-
-        document.querySelectorAll('#roleSelector button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('#roleSelector button').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.userRole = btn.dataset.role;
-                const roleNames = { manager: '🚚 مدير النقل', sales: '📋 مندوب مبيعات', warehouse: '🏚️ مخازن', viewer: '👀 مشاهد' };
-                document.getElementById('roleBadge').textContent = roleNames[state.userRole];
-                renderAll();
-            });
-        });
-
-        // ========== RENDER FUNCTIONS ==========
-        function renderAll() {
-            renderDashboard();
-            renderOrders();
-            renderReports();
-            renderNewOrder();
-            renderDetail();
-            renderUsers();
-            updateTabs();
-        }
-
+        function renderAll() { renderDashboard(); renderOrders(); renderNewOrder(); updateTabs(); }
         function updateTabs() {
-            document.querySelectorAll('.tab').forEach(el => {
-                el.classList.toggle('active', el.dataset.tab === state.currentTab);
-            });
+            document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === state.currentTab));
             document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-            const viewMap = { 'dashboard': 'viewDashboard', 'new': 'viewNew', 'orders': 'viewOrders', 'reports': 'viewReports', 'users': 'viewUsers', 'detail': 'viewDetail' };
-            const target = document.getElementById(viewMap[state.currentTab]);
+            const map = { 'dashboard':'viewDashboard','new':'viewNew','orders':'viewOrders' };
+            const target = document.getElementById(map[state.currentTab]);
             if (target) target.classList.remove('hidden');
         }
 
         function renderDashboard() {
             const el = document.getElementById('viewDashboard');
             const total = state.orders.length;
-            const closed = state.orders.filter(o => o.isClosed === true).length;
-            const pending = state.orders.filter(o => o.isClosed !== true).length;
-            const withDriver = state.orders.filter(o => o.status === 'with_driver').length;
             const delivered = state.orders.filter(o => o.status === 'delivered').length;
-            const partial = state.orders.filter(o => o.status === 'partial').length;
-            const failed = state.orders.filter(o => o.status === 'failed').length;
-            const totalRevenue = state.orders.reduce((sum, o) => sum + (Number(o.collectAmount) || 0), 0);
-            const totalDebt = state.orders.filter(o => o.paymentMethod === 'آجل' && o.isClosed !== true).reduce((sum, o) => sum + (Number(o.collectAmount) || 0), 0);
-            const overdueCount = state.orders.filter(o => o.paymentMethod === 'آجل' && isOverdue(o.dueDate) && o.isClosed !== true).length;
-            const recent = state.orders.slice(0, 6);
+            const pending = state.orders.filter(o => o.status !== 'delivered').length;
+            const recent = state.orders.slice(0, 5);
             el.innerHTML = `
             <div class="stat-row">
-              <div class="stat"><span class="icon">📦</span><b>${total}</b><span>إجمالي الطلبات</span></div>
-              <div class="stat"><span class="icon">⏳</span><b>${pending}</b><span>قيد التنفيذ</span></div>
-              <div class="stat"><span class="icon">✅</span><b>${delivered}</b><span>تم التسليم</span></div>
-              <div class="stat"><span class="icon">🚚</span><b>${withDriver}</b><span>مع السائق</span></div>
+              <div class="stat"><b>${total}</b><span>إجمالي الطلبات</span></div>
+              <div class="stat"><b>${pending}</b><span>قيد التنفيذ</span></div>
+              <div class="stat"><b>${delivered}</b><span>تم التسليم</span></div>
             </div>
-            <div class="stat-row">
-              <div class="stat"><span class="icon">⚠️</span><b>${partial}</b><span>تسليم جزئي</span></div>
-              <div class="stat"><span class="icon">❌</span><b>${failed}</b><span>فشل التسليم</span></div>
-              <div class="stat"><span class="icon">✅</span><b>${closed}</b><span>مغلقة</span></div>
-              <div class="stat" style="border-color:${overdueCount > 0 ? 'var(--danger)' : 'var(--border)'}">
-                <span class="icon">📅</span>
-                <b style="color:${overdueCount > 0 ? 'var(--danger)' : 'inherit'}">${fmtMoney(totalDebt)}</b>
-                <span>ديون آجل ${overdueCount > 0 ? '⚠️ ' + overdueCount + ' متأخرة' : ''}</span>
-              </div>
-            </div>
-            <h2 style="font-size:14px;font-weight:700;margin:16px 0 8px;">📋 آخر الطلبات</h2>
-            ${recent.length === 0 ? '<div class="empty">لا توجد طلبات بعد. ابدأ بإنشاء طلب جديد!</div>' : recent.map(orderCardHTML).join('')}
-          `;
-        }
-
-        function orderCardHTML(o) {
-            const statusMap = { 'pending': 'قيد التنفيذ', 'with_driver': 'مع السائق', 'delivered': 'تم التسليم', 'partial': 'تسليم جزئي', 'failed': 'فشل التسليم', 'closed': 'مغلقة' };
-            const pillClass = o.isClosed ? 'closed' : o.status === 'delivered' ? 'delivered' : o.status === 'with_driver' ? 'withdriver' : o.status === 'partial' ? 'partial' : o.status === 'failed' ? 'failed' : 'pending';
-            const closedClass = o.isClosed ? 'closed' : '';
-            const debtBadge = o.paymentMethod === 'آجل' && !o.isClosed ? `<span class="pill debt">آجل</span>` : '';
-            return `
-            <div class="order-item ${closedClass}" data-order-id="${o.$id}">
-              <div class="order-top">
-                <div>
-                  <div class="order-id">${o.orderId || o.$id} · ${fmtDate(o.createdAt)}</div>
-                  <div class="order-name">${escapeHtml(o.customerName)}</div>
-                  <div class="order-meta">📞 ${escapeHtml(o.phone)} · ${fmtMoney(o.collectAmount)} · ${o.paymentMethod}</div>
-                </div>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                  ${debtBadge}
-                  <span class="pill ${pillClass}">${statusMap[o.status] || o.status}</span>
+            <h2 style="font-size:14px;font-weight:700;margin:14px 0 8px;">📋 آخر الطلبات</h2>
+            ${recent.length === 0 ? '<div class="empty">لا توجد طلبات</div>' : recent.map(o => `
+              <div class="order-item" data-order-id="${o.$id}">
+                <div class="order-top">
+                  <div><div class="order-name">${escapeHtml(o.customerName)}</div><div class="order-meta">${fmtDate(o.createdAt)} · ${fmtMoney(o.collectAmount)}</div></div>
+                  <span class="pill ${o.status === 'delivered' ? 'delivered' : ''}">${o.status === 'delivered' ? 'تم التسليم' : 'قيد التنفيذ'}</span>
                 </div>
               </div>
-            </div>
+            `).join('')}
           `;
+            document.querySelectorAll('.order-item').forEach(el => {
+                el.addEventListener('click', () => { showToast('📋 تفاصيل الطلب: ' + el.dataset.orderId); });
+            });
         }
 
         function renderOrders() {
             const el = document.getElementById('viewOrders');
             const list = state.orders;
             el.innerHTML = `
-            <h2 style="font-size:14px;font-weight:700;margin:0 0 12px;">📋 جميع الطلبات (${list.length})</h2>
-            ${list.length === 0 ? '<div class="empty">لا توجد طلبات</div>' : list.map(orderCardHTML).join('')}
-          `;
-        }
-
-        function renderReports() {
-            const el = document.getElementById('viewReports');
-            const total = state.orders.length;
-            const delivered = state.orders.filter(o => o.status === 'delivered').length;
-            const pending = state.orders.filter(o => o.isClosed !== true).length;
-            const closed = state.orders.filter(o => o.isClosed === true).length;
-            const partial = state.orders.filter(o => o.status === 'partial').length;
-            const failed = state.orders.filter(o => o.status === 'failed').length;
-            const totalRevenue = state.orders.reduce((sum, o) => sum + (Number(o.collectAmount) || 0), 0);
-            const totalDebt = state.orders.filter(o => o.paymentMethod === 'آجل' && o.isClosed !== true).reduce((sum, o) => sum + (Number(o.collectAmount) || 0), 0);
-            el.innerHTML = `
-            <h2 style="font-size:14px;font-weight:700;margin:0 0 12px;">📈 التقارير والإحصائيات</h2>
-            <div class="stat-row">
-              <div class="stat"><span class="icon">📦</span><b>${total}</b><span>إجمالي الطلبات</span></div>
-              <div class="stat"><span class="icon">✅</span><b>${delivered}</b><span>تم التسليم</span></div>
-              <div class="stat"><span class="icon">⏳</span><b>${pending}</b><span>قيد التنفيذ</span></div>
-              <div class="stat"><span class="icon">🔒</span><b>${closed}</b><span>مغلقة</span></div>
-            </div>
-            <div class="stat-row">
-              <div class="stat"><span class="icon">💰</span><b>${fmtMoney(totalRevenue)}</b><span>إجمالي الإيرادات</span></div>
-              <div class="stat"><span class="icon">📅</span><b>${fmtMoney(totalDebt)}</b><span>إجمالي الديون (آجل)</span></div>
-              <div class="stat"><span class="icon">⚠️</span><b>${partial}</b><span>تسليم جزئي</span></div>
-              <div class="stat"><span class="icon">❌</span><b>${failed}</b><span>فشل التسليم</span></div>
-            </div>
-          `;
-        }
-
-        function renderUsers() {
-            const el = document.getElementById('viewUsers');
-            if (state.userRole !== 'manager') {
-                el.innerHTML = '<div class="empty">⛔ هذه الصفحة مخصصة للمدير فقط</div>';
-                return;
-            }
-            const list = state.users;
-            el.innerHTML = `
-            <div class="user-mgmt-card">
-              <h3>👥 إدارة المستخدمين</h3>
-              <div class="row2">
-                <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني">
-                <input type="password" id="newUserPassword" placeholder="كلمة المرور">
+            <h2 style="font-size:14px;font-weight:700;margin:14px 0 8px;">📋 جميع الطلبات (${list.length})</h2>
+            ${list.length === 0 ? '<div class="empty">لا توجد طلبات</div>' : list.map(o => `
+              <div class="order-item">
+                <div class="order-top">
+                  <div><div class="order-name">${escapeHtml(o.customerName)}</div><div class="order-meta">${fmtDate(o.createdAt)} · ${fmtMoney(o.collectAmount)}</div></div>
+                  <span class="pill ${o.status === 'delivered' ? 'delivered' : ''}">${o.status === 'delivered' ? 'تم التسليم' : 'قيد التنفيذ'}</span>
+                </div>
               </div>
-              <div class="row2" style="margin-top:8px;">
-                <select id="newUserRole">
-                  <option value="manager">🚚 مدير النقل</option>
-                  <option value="sales">📋 مندوب مبيعات</option>
-                  <option value="warehouse">🏚️ مخازن</option>
-                  <option value="viewer">👀 مشاهد</option>
-                </select>
-                <button class="btn-primary btn-gold" id="addUserBtn" style="margin:0;">➕ إضافة مستخدم</button>
-              </div>
-            </div>
-            <div class="card">
-              <h3 style="font-size:14px;">📋 قائمة المستخدمين (${list.length})</h3>
-              ${list.length === 0 ? '<div class="empty">لا يوجد مستخدمون</div>' :
-                list.map(u => `
-                  <div class="user-list-item">
-                    <span>${escapeHtml(u.email)}</span>
-                    <span class="role-tag">${u.role || 'مشاهد'}</span>
-                  </div>
-                `).join('')
-              }
-            </div>
+            `).join('')}
           `;
-            document.getElementById('addUserBtn')?.addEventListener('click', async () => {
-                const email = document.getElementById('newUserEmail').value;
-                const pass = document.getElementById('newUserPassword').value;
-                const role = document.getElementById('newUserRole').value;
-                if (!email || !pass) { showToast('❌ أدخل البريد وكلمة المرور'); return; }
-                try {
-                    await account.create(ID.unique(), email, pass);
-                    await createUserInDB(email, role);
-                    document.getElementById('newUserEmail').value = '';
-                    document.getElementById('newUserPassword').value = '';
-                    showToast('✅ تم إضافة المستخدم بنجاح');
-                } catch (e) {
-                    showToast('❌ ' + e.message);
-                }
-            });
         }
 
         function renderNewOrder() {
             const el = document.getElementById('viewNew');
             const d = state.draft;
             el.innerHTML = `
-            <div class="card">
-              <h2 style="font-size:16px;margin-bottom:12px;">➕ طلب شحن جديد</h2>
+            <div class="card" style="background:#fff;border-radius:12px;padding:16px;border:1px solid #dde2e8;margin-top:14px;">
+              <h2 style="font-size:16px;margin-bottom:12px;">➕ طلب جديد</h2>
               <label>👤 اسم العميل</label>
               <input type="text" id="f_customer" value="${escapeHtml(d.customerName)}" placeholder="اسم العميل">
-              <div class="row2">
-                <div><label>📞 رقم التليفون</label><input type="tel" id="f_phone" value="${escapeHtml(d.phone)}" placeholder="01xxxxxxxxx"></div>
-                <div><label>📍 العنوان</label><input type="text" id="f_address" value="${escapeHtml(d.address)}" placeholder="العنوان بالتفصيل"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div><label>📞 التليفون</label><input type="tel" id="f_phone" value="${escapeHtml(d.phone)}" placeholder="01xxxxxxxxx"></div>
+                <div><label>📍 العنوان</label><input type="text" id="f_address" value="${escapeHtml(d.address)}" placeholder="العنوان"></div>
               </div>
               <label>📦 الأصناف</label>
               <div id="itemsWrap">
                 ${d.items.map((it, idx) => `
-                  <div class="row2" style="gap:6px;margin-bottom:6px;" data-idx="${idx}">
+                  <div style="display:grid;grid-template-columns:1fr 80px 80px 30px;gap:6px;margin-bottom:6px;" data-idx="${idx}">
                     <input type="text" placeholder="اسم الصنف" data-field="name" value="${escapeHtml(it.name)}">
-                    <input type="number" placeholder="الكمية" data-field="qty" value="${it.qty}" min="1">
-                    <input type="number" placeholder="سعر الوحدة" data-field="price" value="${it.price}" min="0">
-                    <button class="btn-primary" style="width:auto;padding:8px 12px;margin:0;background:var(--danger);" data-rm="${idx}">✕</button>
+                    <input type="number" placeholder="كمية" data-field="qty" value="${it.qty}" min="1">
+                    <input type="number" placeholder="سعر" data-field="price" value="${it.price}" min="0">
+                    <button style="background:#b23b3b;color:#fff;border:none;border-radius:8px;cursor:pointer;" data-rm="${idx}">✕</button>
                   </div>
                 `).join('')}
               </div>
-              <button class="btn-primary" style="margin:6px 0 0;background:var(--border);color:var(--primary);" id="addItemBtn">+ إضافة صنف</button>
+              <button style="background:#dde2e8;border:none;padding:8px;border-radius:8px;width:100%;cursor:pointer;font-weight:700;" id="addItemBtn">+ إضافة صنف</button>
               <label>💰 طريقة الدفع</label>
-              <select id="f_payment">
-                <option value="نقدي" ${d.paymentMethod === 'نقدي' ? 'selected' : ''}>نقدي</option>
-                <option value="آجل" ${d.paymentMethod === 'آجل' ? 'selected' : ''}>آجل</option>
-              </select>
-              <div id="debtPeriodWrap" class="${d.paymentMethod !== 'آجل' ? 'hidden' : ''}" style="margin-top:8px;">
-                <label>📅 مدة الأجل (عدد الأيام)</label>
-                <input type="number" id="f_debtPeriod" value="${d.debtPeriod || 0}" min="0" placeholder="مثلاً: 30">
-                <p style="font-size:11px;color:#5b6b81;margin-top:4px;">📌 تاريخ الاستحقاق: <strong id="dueDateDisplay">${d.dueDate ? fmtDate(d.dueDate) : '—'}</strong></p>
-              </div>
-              <label>💰 هل سيستلم السائق مبلغ؟</label>
-              <select id="f_collect">
-                <option value="true" ${d.willCollect ? 'selected' : ''}>نعم</option>
-                <option value="false" ${!d.willCollect ? 'selected' : ''}>لا</option>
-              </select>
-              <div id="collectAmountWrap" class="${!d.willCollect ? 'hidden' : ''}">
-                <label>المبلغ المستلم</label>
-                <input type="number" id="f_collectAmount" value="${d.collectAmount || 0}" min="0" placeholder="0">
-              </div>
-              <label>📝 ملاحظات إضافية</label>
+              <select id="f_payment"><option value="نقدي">نقدي</option><option value="آجل">آجل</option></select>
+              <label>💰 المبلغ المستلم</label>
+              <input type="number" id="f_collectAmount" value="${d.collectAmount || 0}" min="0">
+              <label>📝 ملاحظات</label>
               <textarea id="f_notes" rows="2">${escapeHtml(d.notes)}</textarea>
-              <label>📱 رقم السائق (للإرسال عبر واتساب)</label>
-              <input type="tel" id="f_driverPhone" value="${escapeHtml(d.driverPhone)}" placeholder="مثال: 201012345678">
-              <div class="row2" style="margin-top:10px;">
-                <button class="btn-primary" id="submitOrderBtn">🚀 إنشاء الطلب</button>
-                <button class="btn-primary btn-success" id="submitAndWhatsAppBtn">📱 إنشاء + إرسال واتساب</button>
-              </div>
+              <button class="btn" id="submitOrderBtn">🚀 إنشاء الطلب</button>
             </div>
           `;
             bindNewOrderEvents();
@@ -736,293 +242,47 @@
             document.getElementById('f_phone')?.addEventListener('input', e => d.phone = e.target.value);
             document.getElementById('f_address')?.addEventListener('input', e => d.address = e.target.value);
             document.getElementById('f_notes')?.addEventListener('input', e => d.notes = e.target.value);
-            document.getElementById('f_driverPhone')?.addEventListener('input', e => d.driverPhone = e.target.value);
-            document.getElementById('f_payment')?.addEventListener('change', e => {
-                d.paymentMethod = e.target.value;
-                document.getElementById('debtPeriodWrap').classList.toggle('hidden', d.paymentMethod !== 'آجل');
-                if (d.paymentMethod === 'آجل') {
-                    d.dueDate = calculateDueDate(d.debtPeriod);
-                    document.getElementById('dueDateDisplay').textContent = fmtDate(d.dueDate);
-                } else {
-                    d.dueDate = null;
-                    document.getElementById('dueDateDisplay').textContent = '—';
-                }
-            });
-            document.getElementById('f_debtPeriod')?.addEventListener('input', e => {
-                d.debtPeriod = Number(e.target.value) || 0;
-                d.dueDate = calculateDueDate(d.debtPeriod);
-                document.getElementById('dueDateDisplay').textContent = fmtDate(d.dueDate);
-            });
-            document.getElementById('f_collect')?.addEventListener('change', e => {
-                d.willCollect = e.target.value === 'true';
-                document.getElementById('collectAmountWrap').classList.toggle('hidden', !d.willCollect);
-            });
+            document.getElementById('f_payment')?.addEventListener('change', e => d.paymentMethod = e.target.value);
             document.getElementById('f_collectAmount')?.addEventListener('input', e => d.collectAmount = Number(e.target.value) || 0);
-            document.querySelectorAll('#itemsWrap .row2').forEach(row => {
+            document.querySelectorAll('#itemsWrap > div').forEach(row => {
                 const idx = Number(row.dataset.idx);
                 row.querySelectorAll('input[data-field]').forEach(inp => {
-                    inp.addEventListener('input', () => {
-                        const field = inp.dataset.field;
-                        d.items[idx][field] = field === 'name' ? inp.value : Number(inp.value) || 0;
-                    });
+                    inp.addEventListener('input', () => { const field = inp.dataset.field; d.items[idx][field] = field === 'name' ? inp.value : Number(inp.value) || 0; });
                 });
-                row.querySelector('[data-rm]')?.addEventListener('click', () => {
-                    if (d.items.length > 1) {
-                        d.items.splice(idx, 1);
-                        renderNewOrder();
-                    }
+                row.querySelector('[data-rm]')?.addEventListener('click', () => { if (d.items.length > 1) { d.items.splice(idx, 1); renderNewOrder(); } });
+            });
+            document.getElementById('addItemBtn')?.addEventListener('click', () => { d.items.push({ name: '', qty: 1, price: 0 }); renderNewOrder(); });
+            document.getElementById('submitOrderBtn')?.addEventListener('click', async () => {
+                if (!d.customerName.trim()) { showToast('❌ أدخل اسم العميل'); return; }
+                const cleanItems = d.items.filter(i => i.name.trim() && i.qty > 0);
+                if (cleanItems.length === 0) { showToast('❌ أضف صنف'); return; }
+                d.items = cleanItems;
+                const doc = await createOrder({
+                    orderId: generateOrderId(),
+                    customerName: d.customerName.trim(),
+                    phone: d.phone.trim(),
+                    address: d.address.trim(),
+                    items: d.items,
+                    paymentMethod: d.paymentMethod,
+                    collectAmount: d.collectAmount || 0,
+                    notes: d.notes || '',
+                    status: 'pending',
+                    createdAt: new Date().toISOString(),
+                    createdBy: state.user?.email || 'unknown'
                 });
-            });
-            document.getElementById('addItemBtn')?.addEventListener('click', () => {
-                d.items.push({ name: '', qty: 1, price: 0 });
-                renderNewOrder();
-            });
-            document.getElementById('submitOrderBtn')?.addEventListener('click', () => submitOrder(false));
-            document.getElementById('submitAndWhatsAppBtn')?.addEventListener('click', () => submitOrder(true));
-        }
-
-        async function submitOrder(sendWhatsAppNow) {
-            const d = state.draft;
-            if (!d.customerName.trim()) { showToast('❌ أدخل اسم العميل'); return; }
-            if (!d.phone.trim()) { showToast('❌ أدخل رقم التليفون'); return; }
-            const cleanItems = d.items.filter(i => i.name.trim() && i.qty > 0);
-            if (cleanItems.length === 0) { showToast('❌ أضف صنف واحد على الأقل'); return; }
-            d.items = cleanItems;
-            const orderData = {
-                orderId: generateOrderId(),
-                customerName: d.customerName.trim(),
-                phone: d.phone.trim(),
-                address: d.address.trim(),
-                items: d.items,
-                paymentMethod: d.paymentMethod,
-                debtPeriod: d.paymentMethod === 'آجل' ? d.debtPeriod : 0,
-                dueDate: d.paymentMethod === 'آجل' ? d.dueDate : null,
-                willCollect: d.willCollect,
-                collectAmount: d.collectAmount || 0,
-                notes: d.notes || '',
-                status: 'pending',
-                isClosed: false,
-                createdAt: new Date().toISOString(),
-                createdBy: state.user?.email || 'unknown',
-                deliveryStatus: null,
-                deliveryNotes: null,
-                partialQty: null,
-                deliveredAt: null,
-                driverName: null,
-                driverPhone: d.driverPhone || '',
-                history: [{ note: '📝 تم إنشاء الطلب', by: state.user?.email || 'نظام', at: new Date().toISOString() }],
-                followUpNotes: []
-            };
-            const doc = await createOrder(orderData);
-            if (doc) {
-                state.draft = {
-                    customerName: '',
-                    phone: '',
-                    address: '',
-                    items: [{ name: '', qty: 1, price: 0 }],
-                    paymentMethod: 'نقدي',
-                    debtPeriod: 0,
-                    dueDate: null,
-                    willCollect: true,
-                    collectAmount: 0,
-                    notes: '',
-                    driverPhone: ''
-                };
-                if (sendWhatsAppNow && d.driverPhone) {
-                    sendWhatsApp(d.driverPhone, doc);
-                } else if (sendWhatsAppNow && !d.driverPhone) {
-                    showToast('⚠️ لم تدخل رقم السائق');
-                }
-                state.currentTab = 'orders';
-                renderAll();
-            }
-        }
-
-        function renderDetail() {
-            const el = document.getElementById('viewDetail');
-            const o = state.orders.find(x => x.$id === state.selectedOrderId);
-            if (!o) { el.innerHTML = '<div class="empty">الطلب غير موجود</div>'; return; }
-            const isClosed = o.isClosed === true;
-            const statusMap = { 'pending': 'قيد التنفيذ', 'with_driver': 'مع السائق', 'delivered': 'تم التسليم', 'partial': 'تسليم جزئي', 'failed': 'فشل التسليم', 'closed': 'مغلقة' };
-            const pillClass = isClosed ? 'closed' : o.status === 'delivered' ? 'delivered' : o.status === 'with_driver' ? 'withdriver' : o.status === 'partial' ? 'partial' : o.status === 'failed' ? 'failed' : 'pending';
-            const isManager = state.userRole === 'manager';
-            const history = o.history || [];
-            el.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;color:#5b6b81;font-weight:600;" id="backBtn">← رجوع</div>
-            <div class="card">
-              <div class="order-top">
-                <div>
-                  <div class="order-id">${o.orderId || o.$id} · ${fmtDate(o.createdAt)}</div>
-                  <div class="order-name">${escapeHtml(o.customerName)}</div>
-                </div>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                  ${o.paymentMethod === 'آجل' && !isClosed ? '<span class="pill debt">آجل</span>' : ''}
-                  <span class="pill ${pillClass}">${statusMap[o.status] || o.status}</span>
-                  ${isClosed ? '<span class="pill closed">✅ مغلقة</span>' : ''}
-                </div>
-              </div>
-              <div class="detail-grid" style="margin-top:12px;">
-                <div class="kv"><span>📞 التليفون</span><b>${escapeHtml(o.phone)}</b></div>
-                <div class="kv"><span>📍 العنوان</span><b>${escapeHtml(o.address || '—')}</b></div>
-                <div class="kv"><span>💰 طريقة الدفع</span><b>${o.paymentMethod}${o.paymentMethod === 'آجل' ? ' · استحقاق: ' + fmtDate(o.dueDate) : ''}</b></div>
-                <div class="kv"><span>💵 المبلغ المستلم</span><b>${fmtMoney(o.collectAmount || 0)}</b></div>
-                ${o.status === 'with_driver' ? `<div class="kv"><span>🚚 السائق</span><b>${escapeHtml(o.driverName || 'تم الإرسال')}</b></div>` : ''}
-                ${o.deliveryNotes ? `<div class="kv" style="grid-column:1/-1;"><span>📝 ملاحظات التسليم</span><b>${escapeHtml(o.deliveryNotes)}</b></div>` : ''}
-              </div>
-              <label style="margin-top:4px;">📦 الأصناف</label>
-              ${o.items.map(it => `
-                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">
-                  <span>${escapeHtml(it.name)} × ${it.qty}</span>
-                  <span>${fmtMoney(it.qty * it.price)}</span>
-                </div>
-              `).join('')}
-              <div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;border-top:2px solid var(--border);margin-top:8px;">
-                <span>الإجمالي</span>
-                <span>${fmtMoney(o.collectAmount || 0)}</span>
-              </div>
-            </div>
-            ${isManager && o.status === 'with_driver' && !isClosed ? `
-            <div class="card" style="border-color:var(--success);background:#f0fdf4;">
-              <h3 style="font-size:14px;color:var(--success);">🚚 تأكيد تسليم الشحنة</h3>
-              <p style="font-size:13px;color:#5b6b81;">اختر حالة التسليم بناءً على رد السائق:</p>
-              <div class="driver-actions">
-                <div class="btn-row">
-                  <button class="btn-deliver" id="deliverFullBtn">✅ تسليم كامل</button>
-                  <button class="btn-partial" id="deliverPartialBtn">⚠️ تسليم جزء</button>
-                  <button class="btn-fail" id="deliverFailBtn">❌ لم يتم التسليم</button>
-                </div>
-                <div class="partial-input" id="partialInput">
-                  <input type="number" id="partialQty" placeholder="الكمية بالكيلو" min="0" step="0.1">
-                  <button id="confirmPartialBtn">تأكيد</button>
-                </div>
-              </div>
-            </div>
-            ` : ''}
-            ${!isClosed ? `
-            <div class="card">
-              <h3 style="font-size:14px;">📝 متابعة الطلب</h3>
-              <div class="row2">
-                <input type="text" id="followUpInput" placeholder="ملاحظة متابعة جديدة...">
-                <button class="btn-primary" style="margin:0;" id="addFollowUpBtn">➕ إضافة</button>
-              </div>
-              <div id="followUpList" style="margin-top:8px;">
-                ${history.length === 0 ? '<p style="color:#5b6b81;font-size:13px;">لا توجد ملاحظات متابعة</p>' :
-                  history.map(n => `
-                    <div class="followup-item">
-                      <p style="margin:0;font-size:13px;">${escapeHtml(n.note)}</p>
-                      <small>${n.by} · ${fmtDate(n.at)}</small>
-                    </div>
-                  `).join('')
-                }
-              </div>
-              <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-                ${!isClosed ? `<button class="btn-success" style="flex:1;padding:10px;border:none;border-radius:10px;font-weight:700;color:#fff;cursor:pointer;" id="closeOrderBtn">✅ إغلاق الطلبية</button>` : ''}
-                ${isClosed ? `<button class="btn-warning" style="flex:1;padding:10px;border:none;border-radius:10px;font-weight:700;color:#fff;cursor:pointer;" id="reopenOrderBtn">🔓 فتح الطلبية مرة أخرى</button>` : ''}
-              </div>
-            </div>
-            ` : ''}
-            <h2 style="font-size:14px;font-weight:700;margin:16px 0 8px;">📜 سجل الحركة</h2>
-            <div class="card">
-              ${history.map(h => `
-                <div class="history-item">
-                  <div class="history-dot"></div>
-                  <div>
-                    <p>${escapeHtml(h.note)}</p>
-                    <small>${h.by} · ${fmtDate(h.at)}</small>
-                  </div>
-                </div>
-              `).join('') || '<p style="color:#5b6b81;">لا توجد حركات</p>'}
-            </div>
-          `;
-            bindDetailEvents(o.$id);
-        }
-
-        function bindDetailEvents(orderId) {
-            document.getElementById('backBtn')?.addEventListener('click', () => {
-                state.currentTab = 'orders';
-                renderAll();
-            });
-            document.getElementById('addFollowUpBtn')?.addEventListener('click', async () => {
-                const input = document.getElementById('followUpInput');
-                const text = input.value.trim();
-                if (!text) { showToast('❌ اكتب ملاحظة'); return; }
-                const order = state.orders.find(o => o.$id === orderId);
-                if (!order) return;
-                const history = order.history || [];
-                history.push({ note: `📝 ${text}`, by: state.user?.email || 'نظام', at: new Date().toISOString() });
-                await updateOrder(orderId, { history });
-                input.value = '';
-                renderDetail();
-            });
-            document.getElementById('deliverFullBtn')?.addEventListener('click', async () => {
-                if (confirm('هل أنت متأكد من تسليم الشحنة كاملة؟')) {
-                    await driverDeliverFull(orderId);
-                    renderAll();
-                }
-            });
-            document.getElementById('deliverFailBtn')?.addEventListener('click', async () => {
-                const reason = prompt('أدخل سبب عدم التسليم:');
-                if (reason !== null) {
-                    await driverDeliverFail(orderId, reason.trim() || 'لا يوجد سبب');
-                    renderAll();
-                }
-            });
-            document.getElementById('deliverPartialBtn')?.addEventListener('click', () => {
-                document.getElementById('partialInput').classList.toggle('show');
-            });
-            document.getElementById('confirmPartialBtn')?.addEventListener('click', async () => {
-                const qty = document.getElementById('partialQty').value;
-                if (!qty || Number(qty) <= 0) {
-                    showToast('❌ أدخل الكمية المسلمة');
-                    return;
-                }
-                await driverDeliverPartial(orderId, Number(qty));
-                renderAll();
-            });
-            document.getElementById('closeOrderBtn')?.addEventListener('click', async () => {
-                if (confirm('هل أنت متأكد من إغلاق هذه الطلبية؟')) {
-                    const order = state.orders.find(o => o.$id === orderId);
-                    if (!order) return;
-                    const history = order.history || [];
-                    history.push({ note: '🔒 تم إغلاق الطلبية', by: state.user?.email || 'نظام', at: new Date().toISOString() });
-                    await updateOrder(orderId, { isClosed: true, status: 'closed', closedAt: new Date().toISOString(), history: history });
-                    showToast('✅ تم إغلاق الطلبية');
-                    renderAll();
-                }
-            });
-            document.getElementById('reopenOrderBtn')?.addEventListener('click', async () => {
-                if (confirm('هل أنت متأكد من فتح الطلبية مرة أخرى؟')) {
-                    const order = state.orders.find(o => o.$id === orderId);
-                    if (!order) return;
-                    const history = order.history || [];
-                    history.push({ note: '🔓 تم فتح الطلبية مرة أخرى', by: state.user?.email || 'نظام', at: new Date().toISOString() });
-                    await updateOrder(orderId, { isClosed: false, status: 'pending', history: history });
-                    showToast('🔓 تم فتح الطلبية');
+                if (doc) {
+                    state.draft = { customerName: '', phone: '', address: '', items: [{ name: '', qty: 1, price: 0 }], paymentMethod: 'نقدي', willCollect: true, collectAmount: 0, notes: '' };
+                    state.currentTab = 'orders';
                     renderAll();
                 }
             });
         }
-
-        document.addEventListener('click', (e) => {
-            const item = e.target.closest('.order-item');
-            if (item) {
-                const id = item.dataset.orderId;
-                if (id) {
-                    state.selectedOrderId = id;
-                    state.currentTab = 'detail';
-                    renderAll();
-                }
-            }
-        });
 
         document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                state.currentTab = tab.dataset.tab;
-                renderAll();
-            });
+            tab.addEventListener('click', () => { state.currentTab = tab.dataset.tab; renderAll(); });
         });
 
         checkUser();
     </script>
 </body>
-    </html>
+</html>
