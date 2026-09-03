@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Order Flow ERP</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f6f9;
+      color: #1f2937;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* القائمة الجانبية */
+    .sidebar {
+      width: 260px;
+      background: #111827;
+      color: white;
+      padding: 20px 15px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto;
+    }
+
+    .logo {
+      padding: 15px;
+      margin-bottom: 25px;
+      text-align: center;
+      border-bottom: 1px solid #374151;
+    }
+
+    .logo h1 {
+      font-size: 24px;
+      color: #60a5fa;
+    }
+
+    .logo p {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 5px;
+    }
+
+    .menu-title {
+      color: #6b7280;
+      font-size: 12px;
+      margin: 20px 10px 8px;
+    }
+
+    .menu button {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #d1d5db;
+      padding: 13px 15px;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      text-align: right;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .menu button:hover,
+    .menu button.active {
+      background: #2563eb;
+      color: white;
+    }
+
+    /* المحتوى */
+    .main {
+      margin-right: 260px;
+      width: calc(100% - 260px);
+      padding: 25px;
+    }
+
+    .topbar {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+
+    .topbar h2 {
+      font-size: 22px;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    /* الكروت */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+
+    .card .label {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .card .value {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .card .sub {
+      font-size: 12px;
+      color: #16a34a;
+      margin-top: 8px;
+    }
+
+    /* الجداول */
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .panel-header h3 {
+      font-size: 17px;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 13px;
+      text-align: right;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+
+    th {
+      color: #6b7280;
+      background: #f9fafb;
+    }
+
+    .status {
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* موبايل */
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 220px;
+      }
+
+      .main {
+        margin-right: 220px;
+        width: calc(100% - 220px);
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .main {
+        margin-right: 0;
+        width: 100%;
+        padding: 12px;
+      }
+
+      .app {
+        display: block;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        padding: 14px;
+      }
+
+      .panel {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 650px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- القائمة -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h1>ORDER FLOW</h1>
+      <p>نظام إدارة المؤسسة ERP</p>
+    </div>
+
+    <div class="menu">
+
+      <div class="menu-title">الرئيسية</div>
+
+      <button class="active">📊 لوحة التحكم</button>
+
+      <div class="menu-title">المبيعات</div>
+
+      <button>🧾 أوامر البيع</button>
+      <button>👥 العملاء</button>
+      <button>💰 الفواتير</button>
+
+      <div class="menu-title">المخازن</div>
+
+      <button>📦 الأصناف</button>
+      <button>🏭 المخازن</button>
+      <button>🔄 حركة المخزون</button>
+
+      <div class="menu-title">الحسابات</div>
+
+      <button>💵 المقبوضات</button>
+      <button>💳 المدفوعات</button>
+      <button>📒 الحسابات</button>
+
+      <div class="menu-title">الإدارة</div>
+
+      <button>👤 المستخدمين</button>
+      <button>🔐 الصلاحيات</button>
+      <button>⚙️ الإعدادات</button>
+
+      <div class="menu-title">التقارير</div>
+
+      <button>📈 التقارير</button>
+
+    </div>
+
+  </aside>
+
+  <!-- المحتوى -->
+  <main class="main">
+
+    <div class="topbar">
+
+      <div>
+        <h2>لوحة التحكم</h2>
+        <p style="color:#6b7280;font-size:13px;margin-top:5px;">
+          مرحباً بك في Order Flow ERP
+        </p>
+      </div>
+
+      <div class="user">
+
+        <div>
+          <strong>مدير النظام</strong>
+          <div style="font-size:11px;color:#6b7280;">
+            صاحب المؤسسة
+          </div>
+        </div>
+
+        <div class="avatar">
+          م
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- الإحصائيات -->
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="label">طلبات اليوم</div>
+        <div class="value">24</div>
+        <div class="sub">↑ 12% عن أمس</div>
+      </div>
+
+      <div class="card">
+        <div class="label">إجمالي المبيعات</div>
+        <div class="value">485,600 ج</div>
+        <div class="sub">↑ 8.5%</div>
+      </div>
+
+      <div class="card">
+        <div class="label">قيمة المخزون</div>
+        <div class="value">2.8 مليون</div>
+        <div class="sub">12 مخزن</div>
+      </div>
+
+      <div class="card">
+        <div class="label">طلبات تحتاج موافقة</div>
+        <div class="value">7</div>
+        <div class="sub" style="color:#dc2626;">
+          تحتاج مراجعة
+        </div>
+      </div>
+
+    </div>
+
+    <!-- الطلبات -->
+
+    <div class="panel">
+
+      <div class="panel-header">
+
+        <h3>آخر أوامر البيع</h3>
+
+        <button class="btn">
+          + أمر بيع جديد
+        </button>
+
+      </div>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>العميل</th>
+            <th>المخزن</th>
+            <th>القيمة</th>
+            <th>الحالة</th>
+            <th>التاريخ</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td>#ORD-10025</td>
+            <td>شركة النور</td>
+            <td>المخزن الرئيسي</td>
+            <td>125,000 ج</td>
+            <td>
+              <span class="status approved">
+                معتمد
+              </span>
+            </td>
+            <td>03/09/2026</td>
+          </tr>
+
+          <tr>
+            <td>#ORD-10024</td>
+            <td>شركة الأمل</td>
+            <td>مخزن العاشر</td>
+            <td>86,500 ج</td>
+            <td>
+              <span class="status pending">
+                انتظار الحسابات
+              </span>
+            </td>
+            <td>03/09/2026</td>
+          </tr>
+
+          <tr>
+            <td>#ORD-10023</td>
+            <td>مصنع المستقبل</td>
+            <td>المخزن الرئيسي</td>
+            <td>210,000 ج</td>
+            <td>
+              <span class="status pending">
+                انتظار المخزن
+              </span>
+            </td>
+            <td>02/09/2026</td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+                </html>
