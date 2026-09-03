@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسار الطلبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c2530;
+    --ink-soft:#3d4a5c;
+    --paper:#f0f2f5;
+    --panel:#ffffff;
+    --line:#dde2e8;
+    --amber:#c08a2e;
+    --amber-bg:#faf1de;
+    --teal:#2b7a6c;
+    --teal-bg:#e4f2ee;
+    --slate:#5b6b81;
+    --slate-bg:#eaeef3;
+    --red:#b23b3b;
+    --red-bg:#faeaea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Cairo',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:760px;margin:0 auto;padding:14px 14px 80px;}
+
+  .header{display:flex;align-items:center;justify-content:space-between;padding:10px 2px 16px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .brand-mark svg{width:18px;height:18px;}
+  .brand-text h1{font-size:16px;margin:0;font-weight:800;letter-spacing:.2px;}
+  .brand-text p{font-size:11px;margin:1px 0 0;color:var(--slate);}
+
+  .role-picker{position:relative;}
+  .role-btn{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;font-family:inherit;font-size:12.5px;color:var(--ink);
+    display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;
+  }
+  .role-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);}
+  .role-menu{
+    position:absolute;left:0;top:calc(100% + 6px);background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(20,25,35,.12);
+    width:200px;padding:6px;z-index:40;display:none;
+  }
+  .role-menu.open{display:block;}
+  .role-item{padding:9px 10px;border-radius:8px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+  .role-item:hover{background:var(--slate-bg);}
+  .role-item.active{background:var(--ink);color:#fff;}
+
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .tab{
+    flex:0 0 auto;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;
+    color:var(--slate);padding:8px 4px;cursor:pointer;white-space:nowrap;position:relative;
+  }
+  .tab.active{color:var(--ink);}
+  .tab.active::after{content:'';position:absolute;bottom:-11px;left:0;right:0;height:2px;background:var(--ink);border-radius:2px;}
+  .tab .badge{background:var(--amber);color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;margin-inline-start:5px;font-weight:700;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;}
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 10px;text-align:center;}
+  .stat b{display:block;font-size:20px;font-weight:800;}
+  .stat span{font-size:11px;color:var(--slate);}
+
+  h2.section-title{font-size:14px;font-weight:700;margin:18px 0 8px;color:var(--ink-soft);}
+
+  .order-item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:9px;cursor:pointer;}
+  .order-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .order-id{font-size:12px;color:var(--slate);font-weight:600;}
+  .order-name{font-size:15px;font-weight:700;margin-top:2px;}
+  .order-meta{font-size:12px;color:var(--slate);margin-top:4px;}
+  .pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .pill.stage-sales_created{background:var(--slate-bg);color:var(--slate);}
+  .pill.stage-logistics_review{background:var(--amber-bg);color:var(--amber);}
+  .pill.stage-accounts_approval{background:var(--amber-bg);color:var(--amber);}
+  .pill.stage-warehouse_release{background:var(--teal-bg);color:var(--teal);}
+  .pill.stage-with_driver{background:var(--teal-bg);color:var(--teal);}
+  .pill.stage-delivered{background:var(--ink);color:#fff;}
+
+  .empty{text-align:center;padding:40px 16px;color:var(--slate);}
+  .empty svg{width:34px;height:34px;margin-bottom:10px;opacity:.5;}
+  .empty p{font-size:13px;margin:0;}
+
+  label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:12px 0 5px;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=tel], input[type=number], select, textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-family:inherit;font-size:14px;background:#fbfbfc;color:var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--ink);background:#fff;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;}
+  .seg-btn{
+    flex:1;min-width:70px;padding:9px 6px;border-radius:9px;border:1px solid var(--line);
+    background:#fbfbfc;font-family:inherit;font-size:12.5px;font-weight:600;
+    color:var(--ink-soft);cursor:pointer;text-align:center;
+  }
+  .seg-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .item-row{display:grid;grid-template-columns:1fr 55px 75px 26px;gap:6px;margin-bottom:6px;align-items:center;}
+  .item-row input{padding:8px 9px;font-size:13px;}
+  .rm-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;color:var(--red);font-size:15px;cursor:pointer;line-height:1;}
+  .add-item-btn{background:none;border:1px dashed var(--line);border-radius:9px;width:100%;padding:9px;font-family:inherit;font-size:12.5px;color:var(--slate);cursor:pointer;font-weight:600;margin-top:2px;}
+
+  .total-line{display:flex;justify-content:space-between;padding:10px 2px;font-size:13.5px;border-top:1px solid var(--line);margin-top:10px;}
+  .total-line b{font-size:15px;}
+
+  .btn-primary{
+    width:100%;padding:13px;border-radius:11px;border:none;background:var(--ink);color:#fff;
+    font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;margin-top:16px;
+  }
+  .btn-primary:disabled{opacity:.4;}
+  .btn-secondary{
+    width:100%;padding:11px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--ink);
+    font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;margin-top:8px;
+  }
+  .hint{font-size:11.5px;color:var(--slate);margin-top:4px;}
+
+  .back-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;color:var(--slate);font-size:13px;font-weight:600;}
+  .stepper{display:flex;margin:16px 0 20px;}
+  .step{flex:1;text-align:center;position:relative;}
+  .step .dot{width:22px;height:22px;border-radius:50%;background:var(--slate-bg);color:var(--slate);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin:0 auto 6px;}
+  .step.done .dot{background:var(--teal);color:#fff;}
+  .step.current .dot{background:var(--ink);color:#fff;}
+  .step .lbl{font-size:9.5px;color:var(--slate);font-weight:700;line-height:1.3;}
+  .step::before{content:'';position:absolute;top:11px;right:50%;width:100%;height:2px;background:var(--slate-bg);z-index:-1;}
+  .step:first-child::before{display:none;}
+  .step.done::before{background:var(--teal);}
+
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .kv{background:var(--slate-bg);border-radius:10px;padding:9px 11px;}
+  .kv span{display:block;font-size:10.5px;color:var(--slate);font-weight:700;margin-bottom:2px;}
+  .kv b{font-size:13px;}
+
+  .history-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .history-item:last-child{border-bottom:none;}
+  .history-dot{width:8px;height:8px;border-radius:50%;background:var(--ink);margin-top:5px;flex-shrink:0;}
+  .history-item p{margin:0;font-size:13px;}
+  .history-item small{color:var(--slate);font-size:11px;}
+
+  .action-box{background:var(--amber-bg);border:1px solid #eddab3;border-radius:12px;padding:14px;margin-top:14px;}
+  .action-box h3{margin:0 0 10px;font-size:13px;color:#8a6420;}
+
+  .cust-item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:9px;}
+  .cust-top{display:flex;justify-content:space-between;align-items:center;}
+  .freq-badge{background:var(--teal-bg);color:var(--teal);font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:30px;font-size:13px;font-weight:600;
+    box-shadow:0 8px 20px rgba(0,0,0,.2);z-index:100;opacity:0;transition:opacity .25s, transform .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  .type-toggle{display:flex;background:var(--slate-bg);border-radius:11px;padding:3px;margin-bottom:16px;}
+  .type-toggle button{flex:1;padding:9px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;color:var(--slate);cursor:pointer;}
+  .type-toggle button.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+let DATA = { orders: [], customers: [], suppliers: [] };
+let LOADED = false;
+
+const ROLES = {
+  sales:     { label:'د. أحمد (المبيعات)', stage:null },
+  logistics: { label:'النقل',              stage:'logistics_review' },
+  accounts:  { label:'الحسابات',           stage:'accounts_approval' },
+  warehouse: { label:'المخازن',            stage:'warehouse_release' },
+  driver:    { label:'السائق',             stage:'with_driver' },
+};
+
+const STAGES = [
+  { key:'sales_created',      label:'إنشاء الأمر', short:'إنشاء' },
+  { key:'logistics_review',   label:'مراجعة النقل', short:'النقل' },
+  { key:'accounts_approval',  label:'اعتماد الحسابات', short:'الحسابات' },
+  { key:'warehouse_release',  label:'إذن صرف المخازن', short:'المخازن' },
+  { key:'with_driver',        label:'مع السائق', short:'السائق' },
+  { key:'delivered',          label:'تم التسليم', short:'تم' },
+];
+
+const PAY_METHODS = ['نقدي','شيك','تحويل بنكي','آجل'];
+
+let state = {
+  role: 'sales',
+  view: 'dashboard',
+  orderType: 'sale',
+  selectedOrderId: null,
+  roleMenuOpen: false,
+  draft: null,
+  custSearch: '',
+};
+
+async function loadData(){
+  try{
+    const res = await fetch('/api/data');
+    DATA = await res.json();
+  }catch(e){}
+  LOADED = true;
+  render();
+}
+async function saveData(){
+  try{
+    await fetch('/api/data', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(DATA)
+    });
+  }catch(e){ showToast('تعذر الحفظ، تأكد من الاتصال بالإنترنت'); }
+}
+
+function uid(prefix){
+  return prefix + '-' + Math.floor(10000 + Math.random()*89999);
+}
+function todayISO(){ return new Date().toISOString(); }
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' });
+}
+function fmtMoney(n){
+  return Number(n||0).toLocaleString('ar-EG') + ' ج.م';
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function newDraft(type){
+  return {
+    id: uid(type === 'sale' ? 'SO' : 'PO'),
+    type,
+    partyName:'', phone:'', address:'',
+    taxInvoice:false,
+    paymentMethod:'نقدي',
+    items:[{name:'', qty:1, price:0}],
+    shippingCost:null,
+    finalTotal:null,
+    stage:'sales_created',
+    driverName:null,
+    createdBy: ROLES.sales.label,
+    createdAt: todayISO(),
+    history:[],
+  };
+}
+
+function itemsTotal(order){
+  return order.items.reduce((s,i)=> s + (Number(i.qty)||0) * (Number(i.price)||0), 0);
+}
+
+function submitNewOrder(){
+  const d = state.draft;
+  if(!d.partyName.trim()){ showToast('من فضلك أدخل اسم ' + (d.type==='sale'?'العميل':'المورد')); return; }
+  if(!d.phone.trim()){ showToast('من فضلك أدخل رقم التليفون'); return; }
+  const cleanItems = d.items.filter(i=>i.name.trim());
+  if(cleanItems.length===0){ showToast('أضف صنف واحد على الأقل'); return; }
+  d.items = cleanItems;
+  d.history.push({ stage:'sales_created', by:d.createdBy, note:'تم إنشاء الأمر بمعرفة ' + d.createdBy, at: todayISO() });
+  d.stage = 'logistics_review';
+  d.history.push({ stage:'logistics_review', by:'النظام', note:'تم تحويل الأمر إلى قسم النقل لتحديد تكلفة الشحن', at: todayISO() });
+
+  DATA.orders.unshift(d);
+
+  const list = d.type === 'sale' ? DATA.customers : DATA.suppliers;
+  let party = list.find(c => c.name === d.partyName.trim() && c.phone === d.phone.trim());
+  if(!party){
+    party = { name:d.partyName.trim(), phone:d.phone.trim(), address:d.address.trim(), orderIds:[] };
+    list.push(party);
+  }
+  party.orderIds.push(d.id);
+  party.address = d.address.trim() || party.address;
+
+  saveData();
+  showToast('تم إنشاء ' + (d.type==='sale'?'أمر البيع':'أمر الشراء') + ' وتحويله للنقل');
+  state.view = 'detail';
+  state.selectedOrderId = d.id;
+  state.draft = null;
+  render();
+}
+
+function logisticsSubmit(order, cost){
+  order.shippingCost = Number(cost) || 0;
+  order.stage = 'accounts_approval';
+  order.history.push({ stage:'logistics_review', by:'النقل', note:'تم تحديد تكلفة الشحن بمبلغ ' + fmtMoney(cost), at: todayISO() });
+  order.history.push({ stage:'accounts_approval', by:'النظام', note:'تم تحويل الأمر إلى الحسابات لاعتماد الأسعار', at: todayISO() });
+  saveData();
+  showToast('تم تسجيل تكلفة النقل وتحويل الأمر للحسابات');
+  render();
+}
+
+function accountsApprove(order, finalTotal, note){
+  order.finalTotal = Number(finalTotal) || (itemsTotal(order) + (order.shippingCost||0));
+  order.stage = 'warehouse_release';
+  order.history.push({ stage:'accounts_approval', by:'الحسابات', note:'تم اعتماد السعر النهائي ' + fmtMoney(order.finalTotal) + (note? ' — '+note : ''), at: todayISO() });
+  order.history.push({ stage:'warehouse_release', by:'النظام', note:'تم تحويل الأمر إلى المخازن لإصدار إذن الصرف', at: todayISO() });
+  saveData();
+  showToast('تم اعتماد الأسعار وتحويل الأمر للمخازن');
+  render();
+}
+
+function warehouseRelease(order, driverName){
+  order.driverName = driverName.trim() || 'غير محدد';
+  order.stage = 'with_driver';
+  order.history.push({ stage:'warehouse_release', by:'المخازن', note:'تم إصدار إذن الصرف وتسليم البضاعة للسائق: ' + order.driverName, at: todayISO() });
+  saveData();
+  showToast('تم إصدار إذن الصرف — الأمر الآن مع السائق');
+  render();
+}
+
+function markDelivered(order){
+  order.stage = 'delivered';
+  order.history.push({ stage:'delivered', by:'السائق', note:'تم تسليم الأمر بنجاح', at: todayISO() });
+  saveData();
+  showToast('تم تسجيل التسليم');
+  render();
+}
+
+function stageIndex(stage){ return STAGES.findIndex(s=>s.key===stage); }
+
+function customerStats(party){
+  const orders = party.orderIds
+    .map(id => DATA.orders.find(o=>o.id===id))
+    .filter(Boolean)
+    .sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
+  if(orders.length < 2){
+    return { count: orders.length, avgDays: null, nextExpected: null, orders };
+  }
+  let gaps = [];
+  for(let i=1;i<orders.length;i++){
+    const g = (new Date(orders[i].createdAt) - new Date(orders[i-1].createdAt)) / 86400000;
+    gaps.push(g);
+  }
+  const avg = Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length);
+  const last = orders[orders.length-1];
+  const next = new Date(new Date(last.createdAt).getTime() + avg*86400000);
+  return { count: orders.length, avgDays: avg, nextExpected: next.toISOString(), orders };
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(!LOADED){ app.innerHTML = `<div class="empty" style="padding-top:80px;"><p>جارِ تحميل البيانات من السحابة…</p></div>`; return; }
+
+  app.innerHTML = headerHTML() + tabsHTML() + viewHTML();
+  bindEvents();
+}
+
+function headerHTML(){
+  const role = ROLES[state.role];
+  return `
+  <div class="header">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M4 17V9l8-5 8 5v8l-8 5-8-5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 9l8 5 8-5" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <div class="brand-text">
+        <h1>مسار الطلبات</h1>
+        <p>نظام سحابي لمتابعة أوامر البيع والشراء</p>
+      </div>
+    </div>
+    <div class="role-picker">
+      <button class="role-btn" id="roleBtn"><span class="role-dot"></span>${role.label}</button>
+      <div class="role-menu ${state.roleMenuOpen?'open':''}" id="roleMenu">
+        ${Object.entries(ROLES).map(([k,r])=>`<div class="role-item ${k===state.role?'active':''}" data-role="${k}">${r.label}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function pendingCountFor(role){
+  const st = ROLES[role].stage;
+  if(!st) return 0;
+  return DATA.orders.filter(o=>o.stage===st).length;
+}
+
+function tabsHTML(){
+  const tabs = [
+    {k:'dashboard', label:'الرئيسية'},
+    {k:'new_sale', label:'أمر بيع / شراء'},
+    {k:'approvals', label:'قائمة عملي', badge: pendingCountFor(state.role)},
+    {k:'customers', label:'العملاء والموردين'},
+  ];
+  return `<div class="tabs">
+    ${tabs.map(t=>`<button class="tab ${state.view===t.k || (t.k==='new_sale' && ['new_sale','new_purchase'].includes(state.view)) ? 'active':''}" data-tab="${t.k}">${t.label}${t.badge?`<span class="badge">${t.badge}</span>`:''}</button>`).join('')}
+  </div>`;
+}
+
+function viewHTML(){
+  if(state.view === 'dashboard') return dashboardHTML();
+  if(state.view === 'new_sale' || state.view === 'new_purchase') return newOrderHTML();
+  if(state.view === 'approvals') return approvalsHTML();
+  if(state.view === 'customers') return customersHTML();
+  if(state.view === 'detail') return detailHTML();
+  return '';
+}
+
+function dashboardHTML(){
+  const sales = DATA.orders.filter(o=>o.type==='sale');
+  const purchases = DATA.orders.filter(o=>o.type==='purchase');
+  const active = DATA.orders.filter(o=>o.stage!=='delivered').length;
+  const delivered = DATA.orders.filter(o=>o.stage==='delivered').length;
+
+  const recent = DATA.orders.slice(0,8);
+
+  return `
+  <div class="stat-row">
+    <div class="stat"><b>${DATA.orders.length}</b><span>إجمالي الأوامر</span></div>
+    <div class="stat"><b>${active}</b><span>قيد التنفيذ</span></div>
+    <div class="stat"><b>${delivered}</b><span>تم التسليم</span></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><b>${sales.length}</b><span>أوامر بيع</span></div>
+    <div class="stat"><b>${purchases.length}</b><span>أوامر شراء</span></div>
+    <div class="stat"><b>${DATA.customers.length + DATA.suppliers.length}</b><span>عملاء وموردين</span></div>
+  </div>
+  <h2 class="section-title">أحدث الأوامر</h2>
+  ${recent.length===0 ? emptyHTML('لا توجد أوامر بعد. ابدأ بإنشاء أمر بيع أو شراء.') : recent.map(orderItemHTML).join('')}
+  `;
+}
+
+function emptyHTML(msg){
+  return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 7l3-4h12l3 4"/><path d="M9 11h6"/></svg><p>${msg}</p></div>`;
+}
+
+function orderItemHTML(o){
+  const stage = STAGES[stageIndex(o.stage)];
+  const total = o.finalTotal || (itemsTotal(o) + (o.shippingCost||0));
+  return `
+  <div class="order-item" data-open="${o.id}">
+    <div class="order-top">
+      <div>
+        <div class="order-id">${o.id} · ${o.type==='sale'?'أمر بيع':'أمر شراء'}</div>
+        <div class="order-name">${escapeHtml(o.partyName)}</div>
+        <div class="order-meta">${fmtDate(o.createdAt)} · ${o.paymentMethod} · ${fmtMoney(total)}</div>
+      </div>
+      <span class="pill stage-${o.stage}">${stage.label}</span>
+    </div>
+  </div>`;
+}
+
+function newOrderHTML(){
+  if(!state.draft || state.draft.type !== state.orderType){
+    state.draft = newDraft(state.orderType);
+  }
+  const d = state.draft;
+  const partyLabel = d.type==='sale' ? 'العميل' : 'المورد';
+
+  return `
+  <div class="type-toggle">
+    <button data-otype="sale" class="${state.orderType==='sale'?'active':''}">أمر بيع</button>
+    <button data-otype="purchase" class="${state.orderType==='purchase'?'active':''}">أمر شراء</button>
+  </div>
+
+  <div class="card">
+    <label>اسم ${partyLabel}</label>
+    <input type="text" id="f_name" value="${escapeAttr(d.partyName)}" placeholder="اسم ${partyLabel}">
+
+    <div class="row2">
+      <div>
+        <label>رقم التليفون</label>
+        <input type="tel" id="f_phone" value="${escapeAttr(d.phone)}" placeholder="01xxxxxxxxx">
+      </div>
+      <div>
+        <label>فاتورة ضريبية؟</label>
+        <div class="seg">
+          <button type="button" class="seg-btn ${d.taxInvoice? 'active':''}" data-tax="1">نعم</button>
+          <button type="button" class="seg-btn ${!d.taxInvoice? 'active':''}" data-tax="0">لا</button>
+        </div>
+      </div>
+    </div>
+
+    <label>العنوان</label>
+    <input type="text" id="f_address" value="${escapeAttr(d.address)}" placeholder="العنوان بالتفصيل">
+
+    <label>طريقة التحصيل</label>
+    <div class="seg">
+      ${PAY_METHODS.map(m=>`<button type="button" class="seg-btn ${d.paymentMethod===m?'active':''}" data-pay="${m}">${m}</button>`).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <label style="margin-top:0;">الأصناف</label>
+    <div id="itemsWrap">
+      ${d.items.map((it,idx)=>`
+        <div class="item-row" data-idx="${idx}">
+          <input type="text" placeholder="اسم الصنف" data-field="name" value="${escapeAttr(it.name)}">
+          <input type="number" placeholder="كمية" min="0" data-field="qty" value="${it.qty}">
+          <input type="number" placeholder="سعر" min="0" data-field="price" value="${it.price}">
+          <button type="button" class="rm-btn" data-rm="${idx}">×</button>
+        </div>`).join('')}
+    </div>
+    <button type="button" class="add-item-btn" id="addItemBtn">+ إضافة صنف</button>
+    <div class="total-line"><span>إجمالي الأصناف (قبل الشحن)</span><b>${fmtMoney(itemsTotal(d))}</b></div>
+  </div>
+
+  <button class="btn-primary" id="submitOrderBtn">إنشاء الأمر وتحويله للنقل</button>
+  <p class="hint" style="text-align:center;">بعد الإنشاء يمر الأمر تلقائيًا على: النقل ← الحسابات ← المخازن ← السائق</p>
+  `;
+}
+
+function approvalsHTML(){
+  const role = ROLES[state.role];
+  if(!role.stage){
+    return `<div class="card"><p style="margin:0;font-size:13.5px;color:var(--ink-soft);">أنت الآن بدور <b>${role.label}</b>. لا توجد قائمة موافقات لهذا الدور — استخدم تبويب "أمر بيع / شراء" لإنشاء أوامر جديدة، أو بدّل الدور من أعلى الشاشة لمتابعة مرحلة أخرى.</p></div>`;
+  }
+  const list = DATA.orders.filter(o=>o.stage===role.stage);
+  return `
+  <h2 class="section-title">بانتظار: ${role.label} (${list.length})</h2>
+  ${list.length===0 ? emptyHTML('لا توجد أوامر بانتظارك حاليًا.') : list.map(orderItemHTML).join('')}
+  `;
+}
+
+function customersHTML(){
+  const allParties = [
+    ...DATA.customers.map(c=>({...c, kind:'عميل'})),
+    ...DATA.suppliers.map(s=>({...s, kind:'مورد'})),
+  ];
+  const q = state.custSearch.trim();
+  const filtered = q ? allParties.filter(p=> p.name.includes(q) || p.phone.includes(q)) : allParties;
+
+  return `
+  <input type="text" id="custSearch" placeholder="ابحث بالاسم أو رقم التليفون" value="${escapeAttr(state.custSearch)}" style="margin-bottom:14px;">
+  ${filtered.length===0 ? emptyHTML('لا يوجد عملاء أو موردون بعد.') : filtered.map(p=>{
+    const stats = customerStats(p);
+    return `
+    <div class="cust-item">
+      <div class="cust-top">
+        <div>
+          <div class="order-name">${escapeHtml(p.name)}</div>
+          <div class="order-meta">${p.kind} · ${escapeHtml(p.phone)}</div>
+        </div>
+        ${stats.avgDays!==null ? `<span class="freq-badge">كل ${stats.avgDays} يوم تقريبًا</span>` : ''}
+      </div>
+      <div class="order-meta" style="margin-top:8px;">${stats.count} طلب${stats.count>1?'ات':''} إجمالاً${stats.nextExpected? ' · الطلب القادم متوقع حوالي ' + fmtDate(stats.nextExpected) : ''}</div>
+    </div>`;
+  }).join('')}
+  `;
+}
+
+function detailHTML(){
+  const o = DATA.orders.find(x=>x.id===state.selectedOrderId);
+  if(!o) return emptyHTML('لم يتم العثور على الأمر.');
+  const idx = stageIndex(o.stage);
+  const total = o.finalTotal || (itemsTotal(o) + (o.shippingCost||0));
+  const role = ROLES[state.role];
+
+  let actionHTML = '';
+  if(role.stage === o.stage){
+    if(o.stage === 'logistics_review'){
+      actionHTML = `
+      <div class="action-box">
+        <h3>مطلوب منك: تحديد تكلفة النقل</h3>
+        <label style="margin-top:0;">تكلفة الشحن (ج.م)</label>
+        <input type="number" id="shipCostInput" min="0" placeholder="0">
+        <button class="btn-primary" id="logisticsBtn">اعتماد التكلفة وتحويل للحسابات</button>
+      </div>`;
+    } else if(o.stage === 'accounts_approval'){
+      const suggested = itemsTotal(o) + (o.shippingCost||0);
+      actionHTML = `
+      <div class="action-box">
+        <h3>مطلوب منك: مراجعة السعر واعتماده</h3>
+        <label style="margin-top:0;">السعر النهائي (شامل النقل) (ج.م)</label>
+        <input type="number" id="finalTotalInput" min="0" value="${suggested}">
+        <label>ملاحظات (اختياري)</label>
+        <input type="text" id="accNoteInput" placeholder="أي تعديل أو ملاحظة">
+        <button class="btn-primary" id="accountsBtn">اعتماد السعر وتحويل للمخازن</button>
+      </div>`;
+    } else if(o.stage === 'warehouse_release'){
+      actionHTML = `
+      <div class="action-box">
+        <h3>مطلوب منك: إصدار إذن الصرف</h3>
+        <label style="margin-top:0;">اسم السائق</label>
+        <input type="text" id="driverInput" placeholder="اسم السائق">
+        <button class="btn-primary" id="warehouseBtn">إصدار إذن الصرف وتسليم السائق</button>
+      </div>`;
+    } else if(o.stage === 'with_driver'){
+      actionHTML = `
+      <div class="action-box">
+        <h3>مطلوب منك: تأكيد التسليم</h3>
+        <button class="btn-primary" id="deliveredBtn">تأكيد تسليم الأمر</button>
+      </div>`;
+    }
+  }
+
+  return `
+  <div class="back-row" id="backBtn">→ رجوع</div>
+
+  <div class="card">
+    <div class="order-top">
+      <div>
+        <div class="order-id">${o.id} · ${o.type==='sale'?'أمر بيع':'أمر شراء'}</div>
+        <div class="order-name">${escapeHtml(o.partyName)}</div>
+      </div>
+      <span class="pill stage-${o.stage}">${STAGES[idx].label}</span>
+    </div>
+
+    <div class="stepper">
+      ${STAGES.map((s,i)=>`
+        <div class="step ${i<idx?'done':''} ${i===idx?'current':''}">
+          <div class="dot">${i<idx?'✓':i+1}</div>
+          <div class="lbl">${s.short}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="detail-grid">
+      <div class="kv"><span>التليفون</span><b>${escapeHtml(o.phone)}</b></div>
+      <div class="kv"><span>فاتورة ضريبية</span><b>${o.taxInvoice?'نعم':'لا'}</b></div>
+      <div class="kv" style="grid-column:1/-1;"><span>العنوان</span><b>${escapeHtml(o.address||'—')}</b></div>
+      <div class="kv"><span>طريقة التحصيل</span><b>${o.paymentMethod}</b></div>
+      <div class="kv"><span>تكلفة النقل</span><b>${o.shippingCost!==null ? fmtMoney(o.shippingCost) : 'لم تحدد بعد'}</b></div>
+      ${o.driverName ? `<div class="kv" style="grid-column:1/-1;"><span>السائق</span><b>${escapeHtml(o.driverName)}</b></div>` : ''}
+    </div>
+
+    <label style="margin-top:4px;">الأصناف</label>
+    ${o.items.map(it=>`<div class="order-meta" style="display:flex;justify-content:space-between;padding:4px 0;"><span>${escapeHtml(it.name)} × ${it.qty}</span><span>${fmtMoney(it.qty*it.price)}</span></div>`).join('')}
+    <div class="total-line"><span>الإجمالي</span><b>${fmtMoney(total)}</b></div>
+  </div>
+
+  ${actionHTML}
+
+  <h2 class="section-title">سجل الحركة</h2>
+  <div class="card">
+    ${o.history.map(h=>`
+      <div class="history-item">
+        <div class="history-dot"></div>
+        <div>
+          <p>${escapeHtml(h.note)}</p>
+          <small>${h.by} · ${fmtDate(h.at)}</small>
+        </div>
+      </div>`).join('')}
+  </div>
+  `;
+}
+
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
+
+function bindEvents(){
+  const roleBtn = document.getElementById('roleBtn');
+  if(roleBtn) roleBtn.onclick = (e)=>{ e.stopPropagation(); state.roleMenuOpen = !state.roleMenuOpen; render(); };
+  document.querySelectorAll('.role-item').forEach(el=>{
+    el.onclick = ()=>{ state.role = el.dataset.role; state.roleMenuOpen=false; render(); };
+  });
+  document.addEventListener('click', (e)=>{
+    if(state.roleMenuOpen && !e.target.closest('.role-picker')){ state.roleMenuOpen=false; render(); }
+  }, { once:true });
+
+  document.querySelectorAll('.tab').forEach(el=>{
+    el.onclick = ()=>{
+      const t = el.dataset.tab;
+      if(t==='new_sale'){ state.view='new_sale'; state.orderType = state.orderType || 'sale'; }
+      else state.view = t;
+      render();
+    };
+  });
+
+  document.querySelectorAll('[data-otype]').forEach(el=>{
+    el.onclick = ()=>{ state.orderType = el.dataset.otype; state.draft = null; state.view='new_sale'; render(); };
+  });
+
+  document.querySelectorAll('[data-open]').forEach(el=>{
+    el.onclick = ()=>{ state.selectedOrderId = el.dataset.open; state.view='detail'; render(); };
+  });
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.onclick = ()=>{ state.view='dashboard'; render(); };
+
+  const fname = document.getElementById('f_name');
+  if(fname){
+    fname.oninput = ()=>{ state.draft.partyName = fname.value; };
+    document.getElementById('f_phone').oninput = (e)=>{ state.draft.phone = e.target.value; };
+    document.getElementById('f_address').oninput = (e)=>{ state.draft.address = e.target.value; };
+    document.querySelectorAll('[data-tax]').forEach(el=>{
+      el.onclick = ()=>{ state.draft.taxInvoice = el.dataset.tax==='1'; render(); };
+    });
+    document.querySelectorAll('[data-pay]').forEach(el=>{
+      el.onclick = ()=>{ state.draft.paymentMethod = el.dataset.pay; render(); };
+    });
+    document.querySelectorAll('.item-row').forEach(row=>{
+      const idx = Number(row.dataset.idx);
+      row.querySelectorAll('input').forEach(inp=>{
+        inp.oninput = ()=>{
+          const field = inp.dataset.field;
+          state.draft.items[idx][field] = field==='name' ? inp.value : Number(inp.value)||0;
+          if(field!=='name'){
+            const totalLine = document.querySelector('.total-line b');
+            if(totalLine) totalLine.textContent = fmtMoney(itemsTotal(state.draft));
+          }
+        };
+      });
+    });
+    document.querySelectorAll('[data-rm]').forEach(el=>{
+      el.onclick = ()=>{
+        const idx = Number(el.dataset.rm);
+        if(state.draft.items.length>1) state.draft.items.splice(idx,1);
+        render();
+      };
+    });
+    document.getElementById('addItemBtn').onclick = ()=>{
+      state.draft.items.push({name:'',qty:1,price:0});
+      render();
+    };
+    document.getElementById('submitOrderBtn').onclick = submitNewOrder;
+  }
+
+  const cs = document.getElementById('custSearch');
+  if(cs) cs.oninput = ()=>{ state.custSearch = cs.value; render(); };
+
+  const logisticsBtn = document.getElementById('logisticsBtn');
+  if(logisticsBtn) logisticsBtn.onclick = ()=>{
+    const val = document.getElementById('shipCostInput').value;
+    const o = DATA.orders.find(x=>x.id===state.selectedOrderId);
+    logisticsSubmit(o, val);
+  };
+  const accountsBtn = document.getElementById('accountsBtn');
+  if(accountsBtn) accountsBtn.onclick = ()=>{
+    const total = document.getElementById('finalTotalInput').value;
+    const note = document.getElementById('accNoteInput').value;
+    const o = DATA.orders.find(x=>x.id===state.selectedOrderId);
+    accountsApprove(o, total, note);
+  };
+  const warehouseBtn = document.getElementById('warehouseBtn');
+  if(warehouseBtn) warehouseBtn.onclick = ()=>{
+    const driver = document.getElementById('driverInput').value;
+    const o = DATA.orders.find(x=>x.id===state.selectedOrderId);
+    warehouseRelease(o, driver);
+  };
+  const deliveredBtn = document.getElementById('deliveredBtn');
+  if(deliveredBtn) deliveredBtn.onclick = ()=>{
+    const o = DATA.orders.find(x=>x.id===state.selectedOrderId);
+    markDelivered(o);
+  };
+}
+
+loadData();
+</script>
+</body>
+  </html>
