@@ -810,3 +810,456 @@
                     <div class="stat-card green">
                         <div class="number">${delivered}</div>
                         <div class="label">✅ تم التسليم</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="number">${myTasks}</div>
+                        <div class="label">📋 مهامي</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getMyTasks() {
+            const role = state.user.role;
+            const orders = state.data.orders || [];
+            
+            if (role === 'driver') {
+                return orders.filter(o => o.driverName === state.user.name && o.stage === 'with_driver');
+            }
+            if (role === 'sales') return orders.filter(o => o.stage === 'sales_created');
+            if (role === 'logistics') return orders.filter(o => o.stage === 'logistics_review');
+            if (role === 'accounts') return orders.filter(o => o.stage === 'accounts_approval');
+            if (role === 'warehouse') return orders.filter(o => o.stage === 'warehouse_release');
+            return orders.filter(o => o.stage !== 'delivered');
+        }
+
+        // ============ Tabs ============
+        function renderTabs() {
+            const role = state.user.role;
+            const tabs = [];
+            const myTasks = getMyTasks();
+            
+            tabs.push({ id: 'dashboard', label: '📊 الرئيسية' });
+            
+            if (role === 'sales' || role === 'admin') {
+                tabs.push({ id: 'new', label: '➕ أمر جديد' });
+            }
+            
+            if (role === 'driver') {
+                tabs.push({ id: 'my_orders', label: '🚚 شحناتي', badge: myTasks.length });
+            } else {
+                tabs.push({ id: 'my_tasks', label: '📋 مهامي', badge: myTasks.length });
+            }
+            
+            if (role === 'admin' || role === 'sales') {
+                tabs.push({ id: 'customers', label: '👥 العملاء' });
+            }
+            
+            return `
+                <div class="tabs">
+                    ${tabs.map(t => `
+                        <button class="tab ${state.view === t.id ? 'active' : ''}" data-tab="${t.id}">
+                            ${t.label}
+                            ${t.badge ? `<span class="badge">${t.badge}</span>` : ''}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ============ View ============
+        function renderView() {
+            switch (state.view) {
+                case 'dashboard': return renderDashboard();
+                case 'new': return renderNewOrder();
+                case 'my_tasks': return renderMyTasks();
+                case 'my_orders': return renderMyOrders();
+                case 'customers': return renderCustomers();
+                default: return renderDashboard();
+            }
+        }
+
+        // ============ Dashboard ============
+        function renderDashboard() {
+            const orders = (state.data.orders || []).slice(0, 10);
+            
+            if (orders.length === 0) {
+                return `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>لا توجد أوامر حالياً</p>
+                        <p style="font-size:13px;margin-top:4px;">ابدأ بإنشاء أمر جديد من تبويب "أمر جديد"</p>
+                    </div>
+                `;
+            }
+            
+            return `
+                <h3 style="margin-bottom:16px;">📦 أحدث الأوامر</h3>
+                ${orders.map(o => renderOrderCard(o)).join('')}
+            `;
+        }
+
+        // ============ Order Card ============
+        function renderOrderCard(order) {
+            const total = order.finalTotal || order.items.reduce((s, i) => s + i.qty * i.price, 0) + (order.shippingCost || 0);
+            const isDriver = state.user.role === 'driver' && order.driverName === state.user.name && order.stage === 'with_driver';
+            
+            let actions = '';
+            
+            if (isDriver) {
+                actions = `
+                    <div class="order-actions">
+                        <button class="btn-driver btn-driver-delivered" onclick="handleDriverStatus('${order.id}', 'delivered', 'تم التسليم بنجاح')">
+                            ✅ تم التسليم
+                        </button>
+                        <button class="btn-driver btn-driver-not-delivered" onclick="handleDriverStatus('${order.id}', 'not_delivered', 'لم يتم التسليم')">
+                            ❌ لم يتم التسليم
+                        </button>
+                        <button class="btn-driver btn-driver-problem" onclick="handleDriverStatus('${order.id}', 'problem', 'يوجد مشكلة')">
+                            ⚠️ مشكلة
+                        </button>
+                    </div>
+                `;
+            }
+            
+            const whatsappBtn = (order.driverPhone && (order.stage === 'with_driver' || order.stage === 'delivered'))
+                ? `<button class="btn-whatsapp" onclick="handleWhatsApp('${order.id}')">
+                    💬 إرسال للسائق
+                </button>`
+                : '';
+            
+            const stageLabel = getStageLabel(order.stage);
+            
+            return `
+                <div class="order-card">
+                    <div class="header">
+                        <div>
+                            <div class="order-id">${order.id} · ${order.type === 'sale' ? 'أمر بيع' : 'أمر شراء'}</div>
+                            <div class="order-name">${escapeHtml(order.partyName)}</div>
+                            <div class="order-meta">${formatDate(order.createdAt)} · ${formatMoney(total)} · ${order.paymentMethod}</div>
+                        </div>
+                        <span class="status-badge status-${order.stage}">${stageLabel}</span>
+                    </div>
+                    ${whatsappBtn}
+                    ${actions}
+                </div>
+            `;
+        }
+
+        // ============ My Tasks ============
+        function renderMyTasks() {
+            const tasks = getMyTasks();
+            
+            if (tasks.length === 0) {
+                return `
+                    <div class="empty-state">
+                        <div class="icon">✨</div>
+                        <p>لا توجد مهام حالياً</p>
+                    </div>
+                `;
+            }
+            
+            return tasks.map(o => renderOrderCard(o)).join('');
+        }
+
+        // ============ My Orders (Driver) ============
+        function renderMyOrders() {
+            const orders = (state.data.orders || []).filter(o => o.driverName === state.user.name);
+            
+            if (orders.length === 0) {
+                return `
+                    <div class="empty-state">
+                        <div class="icon">🚚</div>
+                        <p>لا توجد شحنات مسندة إليك</p>
+                    </div>
+                `;
+            }
+            
+            return orders.map(o => renderOrderCard(o)).join('');
+        }
+
+        // ============ Customers ============
+        function renderCustomers() {
+            const customers = state.data.customers || [];
+            const suppliers = state.data.suppliers || [];
+            
+            if (customers.length === 0 && suppliers.length === 0) {
+                return `
+                    <div class="empty-state">
+                        <div class="icon">👥</div>
+                        <p>لا يوجد عملاء أو موردون</p>
+                    </div>
+                `;
+            }
+            
+            const all = [
+                ...customers.map(c => ({ ...c, type: 'عميل' })),
+                ...suppliers.map(s => ({ ...s, type: 'مورد' }))
+            ];
+            
+            return `
+                <h3 style="margin-bottom:16px;">👥 العملاء والموردين</h3>
+                ${all.map(p => `
+                    <div class="order-card" style="border-right-color: ${p.type === 'عميل' ? '#3498db' : '#2ecc71'};">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <div style="font-weight:700;font-size:16px;">${escapeHtml(p.name)}</div>
+                                <div style="font-size:13px;color:#7f8c8d;">${p.type} · ${escapeHtml(p.phone)}</div>
+                                <div style="font-size:12px;color:#7f8c8d;">📦 ${(p.orderIds || []).length} طلب</div>
+                            </div>
+                            <span style="padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#f8f9fa;">
+                                ${p.type}
+                            </span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // ============ New Order ============
+        function renderNewOrder() {
+            return `
+                <div class="order-card" style="border-right-color: var(--gold);">
+                    <h3 style="margin-bottom:16px;">➕ إنشاء أمر جديد</h3>
+                    
+                    <div style="display:flex;gap:10px;margin-bottom:16px;">
+                        <button class="tab ${state.orderType === 'sale' ? 'active' : ''}" style="flex:1;text-align:center;" onclick="setOrderType('sale')">أمر بيع</button>
+                        <button class="tab ${state.orderType === 'purchase' ? 'active' : ''}" style="flex:1;text-align:center;" onclick="setOrderType('purchase')">أمر شراء</button>
+                    </div>
+                    
+                    <div id="newOrderForm">
+                        <div class="form-group">
+                            <label>${state.orderType === 'sale' ? 'اسم العميل' : 'اسم المورد'}</label>
+                            <input type="text" id="partyName" placeholder="أدخل الاسم">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم التليفون</label>
+                            <input type="tel" id="phone" placeholder="أدخل رقم التليفون">
+                        </div>
+                        <div class="form-group">
+                            <label>العنوان</label>
+                            <input type="text" id="address" placeholder="أدخل العنوان">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div class="form-group">
+                                <label>طريقة الدفع</label>
+                                <select id="paymentMethod">
+                                    <option value="نقدي">نقدي</option>
+                                    <option value="شيك">شيك</option>
+                                    <option value="تحويل بنكي">تحويل بنكي</option>
+                                    <option value="آجل">آجل</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>فاتورة ضريبية</label>
+                                <select id="taxInvoice">
+                                    <option value="true">نعم</option>
+                                    <option value="false">لا</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="border-top:2px solid #e8ecf0;padding-top:16px;margin-top:8px;">
+                            <label style="font-weight:700;display:block;margin-bottom:8px;">📦 الأصناف</label>
+                            <div id="itemsContainer">
+                                <div class="item-row" style="display:grid;grid-template-columns:1fr 80px 100px 30px;gap:8px;margin-bottom:6px;">
+                                    <input type="text" class="item-name" placeholder="اسم الصنف">
+                                    <input type="number" class="item-qty" placeholder="الكمية" value="1">
+                                    <input type="number" class="item-price" placeholder="السعر" value="0">
+                                    <button class="remove-item" style="background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;">×</button>
+                                </div>
+                            </div>
+                            <button onclick="addItemRow()" style="padding:10px;border:2px dashed #e8ecf0;border-radius:12px;background:none;width:100%;font-family:inherit;font-weight:600;color:#7f8c8d;cursor:pointer;margin-top:4px;">
+                                + إضافة صنف
+                            </button>
+                        </div>
+                        
+                        <button class="btn-primary" style="margin-top:16px;" onclick="submitOrder()">
+                            🚀 إنشاء الأمر وتحويله للنقل
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ Order Actions ============
+        let orderType = 'sale';
+
+        function setOrderType(type) {
+            orderType = type;
+            state.orderType = type;
+            render();
+        }
+
+        function addItemRow() {
+            const container = document.getElementById('itemsContainer');
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.style.cssText = 'display:grid;grid-template-columns:1fr 80px 100px 30px;gap:8px;margin-bottom:6px;';
+            row.innerHTML = `
+                <input type="text" class="item-name" placeholder="اسم الصنف">
+                <input type="number" class="item-qty" placeholder="الكمية" value="1">
+                <input type="number" class="item-price" placeholder="السعر" value="0">
+                <button class="remove-item" style="background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;font-size:18px;" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(row);
+        }
+
+        async function submitOrder() {
+            const partyName = document.getElementById('partyName')?.value.trim();
+            const phone = document.getElementById('phone')?.value.trim();
+            const address = document.getElementById('address')?.value.trim();
+            const paymentMethod = document.getElementById('paymentMethod')?.value;
+            const taxInvoice = document.getElementById('taxInvoice')?.value === 'true';
+            
+            if (!partyName) { showToast('يرجى إدخال اسم ' + (orderType === 'sale' ? 'العميل' : 'المورد')); return; }
+            if (!phone) { showToast('يرجى إدخال رقم التليفون'); return; }
+            
+            const itemRows = document.querySelectorAll('.item-row');
+            const items = [];
+            let hasItems = false;
+            
+            itemRows.forEach(row => {
+                const name = row.querySelector('.item-name')?.value.trim();
+                const qty = parseInt(row.querySelector('.item-qty')?.value) || 0;
+                const price = parseFloat(row.querySelector('.item-price')?.value) || 0;
+                if (name) {
+                    items.push({ name, qty, price });
+                    hasItems = true;
+                }
+            });
+            
+            if (!hasItems) { showToast('أضف صنف واحد على الأقل'); return; }
+            
+            const order = {
+                type: orderType,
+                partyName,
+                phone,
+                address: address || '',
+                paymentMethod,
+                taxInvoice,
+                items,
+                createdBy: state.user.name,
+                shippingCost: 0,
+                finalTotal: items.reduce((s, i) => s + i.qty * i.price, 0)
+            };
+            
+            try {
+                const result = await API.createOrder(order);
+                showToast('✅ تم إنشاء الأمر بنجاح وتحويله للنقل');
+                state.view = 'dashboard';
+                await loadData();
+                render();
+            } catch (error) {
+                showToast('حدث خطأ أثناء إنشاء الأمر');
+            }
+        }
+
+        // ============ Driver Actions ============
+        async function handleDriverStatus(orderId, status, note) {
+            try {
+                await API.updateDriverStatus(orderId, status, note);
+                showToast('✅ تم تحديث حالة الشحنة');
+                await loadData();
+                render();
+            } catch (error) {
+                showToast('حدث خطأ أثناء تحديث الحالة');
+            }
+        }
+
+        // ============ WhatsApp ============
+        function buildWhatsAppMessage(order) {
+            const total = order.finalTotal || order.items.reduce((s, i) => s + i.qty * i.price, 0) + (order.shippingCost || 0);
+            const itemsText = order.items.map(i => `• ${i.name} × ${i.qty} = ${formatMoney(i.qty * i.price)}`).join('\n');
+            const typeLabel = order.type === 'sale' ? 'أمر بيع' : 'أمر شراء';
+            
+            return `🚚 *رصرص للتوكيلات التجارية*\n` +
+                `*${typeLabel} #${order.id}*\n\n` +
+                `👤 العميل: ${order.partyName}\n` +
+                `📞 التليفون: ${order.phone}\n` +
+                `📍 العنوان: ${order.address || 'غير محدد'}\n\n` +
+                `📦 *الأصناف:*\n${itemsText}\n\n` +
+                `💰 الإجمالي: ${formatMoney(total)}\n` +
+                `💳 طريقة الدفع: ${order.paymentMethod}\n` +
+                `🧾 فاتورة ضريبية: ${order.taxInvoice ? 'نعم' : 'لا'}\n\n` +
+                `*📋 يرجى اختيار حالة الشحنة:*\n` +
+                `1️⃣ تم التسليم ✅\n` +
+                `2️⃣ لم يتم التسليم ❌\n` +
+                `3️⃣ يوجد مشكلة ⚠️\n\n` +
+                `✍️ الرجاء الرد برقم الخيار المناسب.\n` +
+                `شكراً لتعاونك مع *رصرص للتوكيلات التجارية* 🌟`;
+        }
+
+        async function handleWhatsApp(orderId) {
+            const order = state.data.orders.find(o => o.id === orderId);
+            if (!order) { showToast('الأمر غير موجود'); return; }
+            if (!order.driverPhone) { showToast('لا يوجد رقم تليفون للسائق'); return; }
+            
+            const message = buildWhatsAppMessage(order);
+            let phone = order.driverPhone.replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '2' + phone;
+            if (!phone.startsWith('2')) phone = '2' + phone;
+            
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+            
+            try {
+                await API.sendWhatsApp(orderId, phone, message);
+            } catch (error) {
+                // Silent fail for logging
+            }
+        }
+
+        // ============ Load Data ============
+        async function loadData() {
+            try {
+                const data = await API.getData();
+                state.data = data;
+                render();
+            } catch (error) {
+                showToast('خطأ في تحميل البيانات');
+            }
+        }
+
+        // ============ Events ============
+        function bindEvents() {
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.onclick = () => {
+                    state.user = null;
+                    state.data = null;
+                    render();
+                };
+            }
+            
+            // Tabs
+            document.querySelectorAll('.tab[data-tab]').forEach(el => {
+                el.onclick = () => {
+                    state.view = el.dataset.tab;
+                    render();
+                };
+            });
+            
+            // Enter key for item inputs
+            document.querySelectorAll('.item-name, .item-qty, .item-price').forEach(el => {
+                el.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addItemRow();
+                    }
+                };
+            });
+        }
+
+        // ============ Init ============
+        render();
+        
+        // Make functions global for inline onclick
+        window.setOrderType = setOrderType;
+        window.addItemRow = addItemRow;
+        window.submitOrder = submitOrder;
+        window.handleDriverStatus = handleDriverStatus;
+        window.handleWhatsApp = handleWhatsApp;
+    </script>
+</body>
+</html>
