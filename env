@@ -1,0 +1,24 @@
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/rasras
+
+# JWT
+JWT_SECRET=your_super_secret_key_change_this
+JWT_EXPIRE=7d
+
+# WhatsApp (Twilio)
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# Admin
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+ADMIN_EMAIL=admin@rasras.com
+
+# Company Info
+COMPANY_NAME=رصرص للتوكيلات التجارية
+COMPANY_NAME_EN=Rasras for Commercial Agencies
