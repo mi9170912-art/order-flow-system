@@ -3,6 +3,15 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
+const {
+  ROLES,
+  createToken,
+  hashPassword,
+  verifyPassword,
+  getSessionExpiry,
+  hasPermission
+} = require("./auth");
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -13,18 +22,21 @@ app.use(express.static(path.join(__dirname, "public")));
 
 function readData() {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    const data = JSON.parse(
+      fs.readFileSync(DATA_FILE, "utf8")
+    );
 
-    if (!data.users) data.users = [];
-    if (!data.orders) data.orders = [];
-    if (!data.customers) data.customers = [];
-    if (!data.suppliers) data.suppliers = [];
-    if (!data.warehouses) data.warehouses = [];
-    if (!data.items) data.items = [];
-    if (!data.auditLog) data.auditLog = [];
+    data.users ||= [];
+    data.orders ||= [];
+    data.customers ||= [];
+    data.suppliers ||= [];
+    data.warehouses ||= [];
+    data.items ||= [];
+    data.auditLog ||= [];
+    data.sessions ||= [];
 
     return data;
-  } catch (error) {
+  } catch {
     return {
       users: [],
       orders: [],
@@ -32,45 +44,116 @@ function readData() {
       suppliers: [],
       warehouses: [],
       items: [],
-      auditLog: []
+      auditLog: [],
+      sessions: []
     };
   }
 }
 
 function writeData(data) {
-  const tempFile = DATA_FILE + ".tmp";
+  const temp = DATA_FILE + ".tmp";
 
   fs.writeFileSync(
-    tempFile,
+    temp,
     JSON.stringify(data, null, 2),
     "utf8"
   );
 
-  fs.renameSync(tempFile, DATA_FILE);
+  fs.renameSync(temp, DATA_FILE);
 }
 
-/*
-  إنشاء رقم عشوائي آمن
-*/
-function createId(prefix) {
-  return (
-    prefix +
-    "-" +
-    Date.now().toString(36).toUpperCase() +
-    "-" +
-    crypto.randomBytes(4).toString("hex").toUpperCase()
+function safeUser(user) {
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    role: user.role,
+    active: user.active !== false
+  };
+}
+
+function findUser(data, username) {
+  return data.users.find(
+    u =>
+      String(u.username).toLowerCase() ===
+      String(username).toLowerCase()
   );
 }
 
-/*
-  تسجيل حركة في النظام
-*/
-function addAuditLog(data, action, user, entity, entityId, details = {}) {
+function getSessionUser(req) {
+  const token = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.substring(7)
+    : null;
+
+  if (!token) return null;
+
+  const data = readData();
+
+  const session = data.sessions.find(
+    s => s.token === token
+  );
+
+  if (!session) return null;
+
+  if (
+    new Date(session.expiresAt).getTime() <
+    Date.now()
+  ) {
+    return null;
+  }
+
+  return data.users.find(
+    u => u.id === session.userId && u.active !== false
+  );
+}
+
+function requireAuth(req, res, next) {
+  const user = getSessionUser(req);
+
+  if (!user) {
+    return res.status(401).json({
+      ok: false,
+      error: "يجب تسجيل الدخول أولاً"
+    });
+  }
+
+  req.user = user;
+  next();
+}
+
+function requirePermission(permission) {
+  return (req, res, next) => {
+    if (!hasPermission(req.user, permission)) {
+      return res.status(403).json({
+        ok: false,
+        error: "ليس لديك صلاحية لتنفيذ هذه العملية"
+      });
+    }
+
+    next();
+  };
+}
+
+function addAudit(
+  data,
+  user,
+  action,
+  entity,
+  entityId,
+  details = {}
+) {
   data.auditLog.push({
-    id: createId("LOG"),
-    action,
+    id:
+      "LOG-" +
+      Date.now() +
+      "-" +
+      crypto.randomBytes(3).toString("hex"),
+
     userId: user?.id || null,
     userName: user?.name || "النظام",
+    action,
     entity,
     entityId: entityId || null,
     details,
@@ -79,8 +162,11 @@ function addAuditLog(data, action, user, entity, entityId, details = {}) {
 }
 
 /*
-  API فحص النظام
+========================================
+ HEALTH
+========================================
 */
+
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
@@ -91,122 +177,223 @@ app.get("/api/health", (req, res) => {
 });
 
 /*
-  جلب البيانات
+========================================
+ CREATE INITIAL ADMIN
+========================================
 */
-app.get("/api/data", (req, res) => {
+
+app.post("/api/setup", async (req, res) => {
   try {
     const data = readData();
 
-    /*
-      لا نرسل كلمات السر للواجهة
-    */
-    const safeData = {
-      ...data,
-      users: data.users.map(user => {
-        const copy = { ...user };
-        delete copy.password;
-        delete copy.passwordHash;
-        return copy;
-      })
+    if (data.users.length > 0) {
+      return res.status(403).json({
+        ok: false,
+        error: "تم إعداد النظام بالفعل"
+      });
+    }
+
+    const password =
+      req.body.password || "ChangeMe123!";
+
+    const passwordHash =
+      await hashPassword(password);
+
+    const admin = {
+      id: "U-0001",
+      name: req.body.name || "صاحب المؤسسة",
+      username: req.body.username || "admin",
+      passwordHash,
+      role: "admin",
+      active: true,
+      createdAt: new Date().toISOString()
     };
 
-    res.json(safeData);
-  } catch (error) {
-    console.error(error);
+    data.users.push(admin);
 
-    res.status(500).json({
-      ok: false,
-      error: "تعذر تحميل بيانات النظام"
-    });
-  }
-});
+    addAudit(
+      data,
+      admin,
+      "SYSTEM_SETUP",
+      "user",
+      admin.id,
+      {
+        username: admin.username
+      }
+    );
 
-/*
-  حفظ البيانات
-  مؤقتًا سنبقي الـ API القديم حتى لا يتعطل النظام الحالي.
-*/
-app.post("/api/data", (req, res) => {
-  try {
-    const incoming = req.body;
-
-    if (!incoming || typeof incoming !== "object") {
-      return res.status(400).json({
-        ok: false,
-        error: "بيانات غير صحيحة"
-      });
-    }
-
-    const current = readData();
-
-    /*
-      حماية أساسية:
-      لا نسمح بإرسال users بدون الحفاظ على بيانات المستخدمين الحالية.
-    */
-    if (Array.isArray(incoming.users)) {
-      incoming.users = incoming.users.map(user => {
-        const oldUser = current.users.find(
-          u => u.id === user.id
-        );
-
-        return {
-          ...user,
-          password:
-            user.password ||
-            oldUser?.password ||
-            undefined,
-          passwordHash:
-            user.passwordHash ||
-            oldUser?.passwordHash ||
-            undefined
-        };
-      });
-    }
-
-    writeData(incoming);
+    writeData(data);
 
     res.json({
       ok: true,
-      message: "تم الحفظ بنجاح"
+      message: "تم إنشاء حساب صاحب المؤسسة",
+      user: safeUser(admin)
     });
+
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       ok: false,
-      error: "تعذر حفظ البيانات"
+      error: "تعذر إعداد النظام"
     });
   }
 });
 
 /*
-  إنشاء سجل تدقيق يدوي
+========================================
+ LOGIN
+========================================
 */
-app.post("/api/audit", (req, res) => {
+
+app.post("/api/auth/login", async (req, res) => {
   try {
     const {
-      action,
-      user,
-      entity,
-      entityId,
-      details
+      username,
+      password
     } = req.body;
 
-    if (!action) {
+    if (!username || !password) {
       return res.status(400).json({
         ok: false,
-        error: "يجب تحديد العملية"
+        error: "اسم المستخدم وكلمة المرور مطلوبان"
       });
     }
 
     const data = readData();
 
-    addAuditLog(
+    const user = findUser(
       data,
-      action,
+      username
+    );
+
+    if (!user || user.active === false) {
+      return res.status(401).json({
+        ok: false,
+        error: "بيانات الدخول غير صحيحة"
+      });
+    }
+
+    /*
+      المستخدم القديم الذي كان يستخدم password
+      سيتم دعمه مؤقتاً.
+    */
+
+    let valid = false;
+
+    if (user.passwordHash) {
+      valid = await verifyPassword(
+        password,
+        user.passwordHash
+      );
+    } else if (user.password) {
+      valid =
+        user.password === password;
+
+      if (valid) {
+        user.passwordHash =
+          await hashPassword(password);
+
+        delete user.password;
+      }
+    }
+
+    if (!valid) {
+      return res.status(401).json({
+        ok: false,
+        error: "بيانات الدخول غير صحيحة"
+      });
+    }
+
+    const token = createToken();
+
+    data.sessions =
+      data.sessions.filter(
+        session =>
+          new Date(session.expiresAt).getTime() >
+          Date.now()
+      );
+
+    data.sessions.push({
+      token,
+      userId: user.id,
+      expiresAt:
+        getSessionExpiry().toISOString(),
+      createdAt:
+        new Date().toISOString()
+    });
+
+    addAudit(
+      data,
       user,
-      entity,
-      entityId,
-      details
+      "LOGIN",
+      "user",
+      user.id
+    );
+
+    writeData(data);
+
+    res.json({
+      ok: true,
+      token,
+      user: safeUser(user),
+      role: ROLES[user.role] || null
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      ok: false,
+      error: "حدث خطأ أثناء تسجيل الدخول"
+    });
+  }
+});
+
+/*
+========================================
+ CURRENT USER
+========================================
+*/
+
+app.get(
+  "/api/auth/me",
+  requireAuth,
+  (req, res) => {
+    res.json({
+      ok: true,
+      user: safeUser(req.user),
+      role: ROLES[req.user.role] || null
+    });
+  }
+);
+
+/*
+========================================
+ LOGOUT
+========================================
+*/
+
+app.post(
+  "/api/auth/logout",
+  requireAuth,
+  (req, res) => {
+    const data = readData();
+
+    const token =
+      req.headers.authorization?.substring(7);
+
+    data.sessions =
+      data.sessions.filter(
+        s => s.token !== token
+      );
+
+    addAudit(
+      data,
+      req.user,
+      "LOGOUT",
+      "user",
+      req.user.id
     );
 
     writeData(data);
@@ -214,21 +401,139 @@ app.post("/api/audit", (req, res) => {
     res.json({
       ok: true
     });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      ok: false,
-      error: "تعذر تسجيل الحركة"
-    });
   }
-});
+);
 
 /*
-  تشغيل النظام
+========================================
+ DATA
+========================================
 */
+
+app.get(
+  "/api/data",
+  requireAuth,
+  (req, res) => {
+    const data = readData();
+
+    const safeData = {
+      ...data,
+
+      users: data.users.map(
+        safeUser
+      ),
+
+      sessions: undefined
+    };
+
+    delete safeData.sessions;
+
+    res.json(safeData);
+  }
+);
+
+/*
+========================================
+ SAVE DATA
+========================================
+
+مؤقتاً نحافظ على طريقة النظام القديمة
+حتى لا تتعطل الواجهة الحالية.
+*/
+
+app.post(
+  "/api/data",
+  requireAuth,
+  (req, res) => {
+    try {
+      const incoming = req.body;
+
+      if (
+        !incoming ||
+        typeof incoming !== "object"
+      ) {
+        return res.status(400).json({
+          ok: false,
+          error: "بيانات غير صحيحة"
+        });
+      }
+
+      const current = readData();
+
+      /*
+        المستخدم العادي لا يستطيع تغيير
+        المستخدمين من خلال API البيانات.
+      */
+
+      incoming.users =
+        current.users;
+
+      incoming.sessions =
+        current.sessions;
+
+      incoming.auditLog =
+        current.auditLog;
+
+      writeData(incoming);
+
+      addAudit(
+        incoming,
+        req.user,
+        "DATA_SAVE",
+        "system",
+        null
+      );
+
+      writeData(incoming);
+
+      res.json({
+        ok: true,
+        message: "تم الحفظ"
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        ok: false,
+        error: "تعذر الحفظ"
+      });
+    }
+  }
+);
+
+/*
+========================================
+ AUDIT LOG
+========================================
+*/
+
+app.get(
+  "/api/audit",
+  requireAuth,
+  requirePermission("*"),
+  (req, res) => {
+    const data = readData();
+
+    res.json({
+      ok: true,
+      logs:
+        data.auditLog
+          .slice()
+          .reverse()
+    });
+  }
+);
+
+/*
+========================================
+ START
+========================================
+*/
+
 app.listen(PORT, () => {
   console.log(
-    `Order Flow ERP يعمل على المنفذ ${PORT}`
+    "Order Flow ERP يعمل على المنفذ " +
+    PORT
   );
 });
